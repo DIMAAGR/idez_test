@@ -34,7 +34,7 @@ String? validateTitle(String? v) {
 }
 
 String? validateDate(String? s) {
-  if (s == null || s.trim().isEmpty) return null; // opcional
+  if (s == null || s.trim().isEmpty) return null;
 
   if (!_isCompleteDate(s)) return 'Data incompleta (use dd/mm/aaaa)';
 

@@ -29,10 +29,8 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
 
-    // Carrega dados
     widget.viewModel.loadAllData();
 
-    // Reações para erros de carregamento
     _disposers.addAll([
       reaction((_) => widget.viewModel.tasksState, (state) {
         if (state is ErrorState) _showError(state);
@@ -43,7 +41,7 @@ class _HomeViewState extends State<HomeView> {
       reaction((_) => widget.viewModel.doneTasksState, (state) {
         if (state is ErrorState) _showError(state);
       }),
-      // Reação para commit de exclusão em lote
+
       reaction((_) => widget.viewModel.deleteRangeState, (state) {
         if (state is ErrorState) {
           _showError(state);

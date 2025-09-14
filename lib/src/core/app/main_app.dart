@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:idez_test/src/core/router/app_router.dart';
 import 'package:idez_test/src/core/router/app_routes.dart';
+import 'package:idez_test/src/core/theme/app_theme.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -12,6 +13,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: AppRoutes.home,
       routes: buildRouter(),
+      theme: AppTheme.light,
     );
   }
 }

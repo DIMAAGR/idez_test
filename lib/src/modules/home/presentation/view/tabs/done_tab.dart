@@ -15,7 +15,7 @@ class DoneTab extends StatelessWidget {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 32, 16.0, 24.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -28,6 +28,24 @@ class DoneTab extends StatelessWidget {
               Observer(
                 builder: (context) {
                   final done = viewModel.doneTasks;
+
+                  if (done.isEmpty) {
+                    return FadeIn(
+                      delay: const Duration(milliseconds: 300),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 48.0),
+                        child: Center(
+                          child: Text(
+                            'Nenhuma tarefa concluída ainda.',
+                            style: AppTheme.textStyles.body1Regular.copyWith(
+                              color: AppTheme.colors.darkGrey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
                   return ListView.separated(
                     cacheExtent: 0,
                     shrinkWrap: true,
@@ -60,7 +78,32 @@ class DoneTab extends StatelessWidget {
                               onChanged: (done) => viewModel.setDone(t.id, done),
                               onEdit: () =>
                                   viewModel.updateTask(t.id, title: '${t.title} (editado)'),
-                              onDelete: () => viewModel.deleteTask(t.id),
+                              onDelete: () {
+                                () {
+                                  final removed = viewModel.removeByIdOptimistic(t.id);
+
+                                  bool undone = false;
+                                  final bar = ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('tarefa excluída'),
+                                      action: SnackBarAction(
+                                        label: 'Desfazer',
+                                        onPressed: () {
+                                          undone = true;
+                                          viewModel.restoreTasks([removed!]);
+                                        },
+                                      ),
+                                      duration: const Duration(seconds: 4),
+                                    ),
+                                  );
+
+                                  bar.closed.then((_) {
+                                    if (!undone) {
+                                      viewModel.commitDeleteOne(t.id);
+                                    }
+                                  });
+                                };
+                              },
                             );
                           },
                         ),

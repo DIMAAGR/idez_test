@@ -1,0 +1,134 @@
+// ignore_for_file: unused_field
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:idez_test/src/core/theme/app_theme.dart';
+
+class TaskTextFormField extends StatefulWidget {
+  final TextEditingController? controller;
+  final String? hintText;
+  final String? titleText;
+  final TextInputType? keyboardType;
+  final TextInputFormatter? inputMask;
+
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  final void Function(String)? onFieldSubmitted;
+  final void Function(String?)? onSaved;
+  final String? initialValue;
+
+  const TaskTextFormField({
+    super.key,
+    this.controller,
+    this.hintText,
+    this.titleText,
+    this.keyboardType,
+    this.inputMask,
+    this.validator,
+    this.onChanged,
+    this.onFieldSubmitted,
+    this.onSaved,
+    this.initialValue,
+  });
+
+  @override
+  State<TaskTextFormField> createState() => _TaskTextFormFieldState();
+}
+
+class _TaskTextFormFieldState extends State<TaskTextFormField> {
+  late final bool _ownsController;
+  late final TextEditingController _controller;
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ownsController = widget.controller == null;
+    _controller = widget.controller ?? TextEditingController(text: widget.initialValue ?? '');
+  }
+
+  @override
+  void dispose() {
+    if (_ownsController) _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colors;
+
+    return FormField<String>(
+      validator: widget.validator,
+      initialValue: _controller.text,
+      onSaved: widget.onSaved,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      builder: (state) {
+        void syncToForm(String v) {
+          if (state.value != v) state.didChange(v);
+          widget.onChanged?.call(v);
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if ((widget.titleText ?? '').isNotEmpty)
+              Text(widget.titleText!, style: AppTheme.textStyles.button),
+            if ((widget.titleText ?? '').isNotEmpty) const SizedBox(height: 4),
+
+            Focus(
+              onFocusChange: (v) => setState(() => _focused = v),
+              child: TextField(
+                controller: _controller,
+                keyboardType: widget.keyboardType,
+                inputFormatters: widget.inputMask != null ? [widget.inputMask!] : null,
+                onChanged: syncToForm,
+                onSubmitted: (v) {
+                  widget.onFieldSubmitted?.call(v);
+                  state.validate();
+                },
+                style: AppTheme.textStyles.button,
+                decoration: InputDecoration(
+                  hintText: widget.hintText,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+
+                  enabledBorder: state.hasError
+                      ? OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: colors.red, width: 1.5),
+                        )
+                      : OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: colors.grey, width: 1.5),
+                        ),
+                  focusedBorder: state.hasError
+                      ? OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: colors.red, width: 2.2),
+                        )
+                      : OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: colors.blue, width: 2),
+                        ),
+
+                  errorText: null,
+                  errorStyle: const TextStyle(height: 0, fontSize: 0),
+                ),
+              ),
+            ),
+
+            if (state.hasError) ...[
+              const SizedBox(height: 4),
+              Text(
+                state.errorText!,
+                style: AppTheme.textStyles.caption.copyWith(color: colors.red),
+                textAlign: TextAlign.start,
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}

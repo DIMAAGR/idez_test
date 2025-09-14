@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:idez_test/src/core/router/app_routes.dart';
 import 'package:idez_test/src/modules/home/presentation/view_model/home_view_model.dart';
 import 'package:idez_test/src/modules/home/presentation/widgets/home_title.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/fade_in.dart';
@@ -17,7 +18,7 @@ class HomeTab extends StatelessWidget {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 32, 16.0, 24.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -52,12 +53,30 @@ class HomeTab extends StatelessWidget {
 
               Observer(
                 builder: (context) {
+                  if (viewModel.tasks.isEmpty) {
+                    return FadeIn(
+                      delay: const Duration(milliseconds: 500),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 48.0),
+                        child: Center(
+                          child: Text(
+                            'Nenhuma tarefa encontrada.\nClique no botão + para adicionar uma nova tarefa.',
+                            textAlign: TextAlign.center,
+                            style: AppTheme.textStyles.body1Regular.copyWith(
+                              color: AppTheme.colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
                   return ListView.separated(
                     cacheExtent: 0,
                     shrinkWrap: true,
                     addAutomaticKeepAlives: false,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: viewModel.tasks.length,
+                    itemCount: viewModel.lastTasks.length,
                     separatorBuilder: (context, index) => FadeIn(
                       delay: Duration(milliseconds: 500 + index * 100),
                       child: Divider(color: AppTheme.colors.grey.withAlpha(70)),
@@ -67,10 +86,11 @@ class HomeTab extends StatelessWidget {
                         delay: Duration(milliseconds: 500 + index * 100),
                         child: Observer(
                           builder: (context) {
-                            final t = viewModel.tasks[index];
+                            final t = viewModel.lastTasks[index];
 
                             final selected = viewModel.selectedTasksIDs.contains(t.id);
                             final isSelectionMode = viewModel.isSelectionMode;
+
                             return TaskTile(
                               id: t.id,
                               title: t.title,
@@ -82,9 +102,40 @@ class HomeTab extends StatelessWidget {
                               onTap: () => viewModel.toggleSelection(t.id),
                               onLongPress: () => viewModel.startSelection(t.id),
                               onChanged: (done) => viewModel.setDone(t.id, done),
-                              onEdit: () =>
-                                  viewModel.updateTask(t.id, title: '${t.title} (editado)'),
-                              onDelete: () => viewModel.deleteTask(t.id),
+                              onEdit: () {
+                                Navigator.of(
+                                  context,
+                                ).pushNamed(AppRoutes.editTask, arguments: t).then((value) {
+                                  if (value == true) {
+                                    viewModel.loadAllData();
+                                  }
+                                });
+                              },
+
+                              onDelete: () {
+                                final removed = viewModel.removeByIdOptimistic(t.id);
+
+                                bool undone = false;
+                                final bar = ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('tarefa excluída'),
+                                    action: SnackBarAction(
+                                      label: 'Desfazer',
+                                      onPressed: () {
+                                        undone = true;
+                                        viewModel.restoreTasks([removed!]);
+                                      },
+                                    ),
+                                    duration: const Duration(seconds: 4),
+                                  ),
+                                );
+
+                                bar.closed.then((_) {
+                                  if (!undone) {
+                                    viewModel.commitDeleteOne(t.id);
+                                  }
+                                });
+                              },
                             );
                           },
                         ),

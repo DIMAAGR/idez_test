@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:idez_test/src/core/theme/app_colors.dart';
 
@@ -44,5 +45,12 @@ class AppTextStyles {
     fontFamily: 'Roboto',
     fontWeight: FontWeight.w400,
     color: _colors.grey,
+  );
+
+  TextStyle get button => TextStyle(
+    fontSize: 14,
+    fontFamily: 'Roboto',
+    fontWeight: FontWeight.w500,
+    color: _colors.black,
   );
 }

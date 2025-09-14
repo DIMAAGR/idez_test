@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import 'package:idez_test/src/core/errors/failure.dart';
+import 'package:idez_test/src/core/state/view_model_state.dart';
+import 'package:idez_test/src/modules/task/domain/usecases/create_task_use_case.dart';
+import 'package:intl/intl.dart';
+import 'package:mobx/mobx.dart';
+
+import '../../data/models/task_model.dart';
+import '../../domain/usecases/edit_task_use_case.dart';
+
+part 'task_view_model.g.dart';
+
+class TaskViewModel = _TaskViewModelBase with _$TaskViewModel;
+
+abstract class _TaskViewModelBase with Store {
+  final CreateTaskUseCase _createTaskUseCase;
+  final EditTaskUseCase _editTaskUseCase;
+
+  _TaskViewModelBase(this._createTaskUseCase, this._editTaskUseCase);
+
+  String title = '';
+  String date = '';
+  String time = '';
+
+  @observable
+  ViewModelState<Failure, void> state = InitialState();
+
+  @action
+  Future<void> createTask() async {
+    state = LoadingState();
+
+    final result = await _createTaskUseCase(
+      TaskModel(
+        id: UniqueKey().toString(),
+        title: title,
+        done: false,
+        createdAt: DateTime.now().toIso8601String(),
+        dueDate: date.isNotEmpty
+            ? DateFormat(
+                'dd/MM/yyyy HH:mm',
+              ).parse('$date ${time.isNotEmpty ? time : '23:59'}').toIso8601String()
+            : null,
+      ),
+    );
+
+    state = result.fold((failure) => ErrorState(failure), (_) => SuccessState(null));
+  }
+
+  Future<void> editTask(String id) async {
+    state = LoadingState();
+
+    final result = await _editTaskUseCase(
+      id,
+      TaskModel(
+        id: id,
+        title: title,
+        done: false,
+        createdAt: DateTime.now().toIso8601String(),
+        dueDate: date.isNotEmpty
+            ? DateFormat(
+                'dd/MM/yyyy HH:mm',
+              ).parse('$date ${time.isNotEmpty ? time : '23:59'}').toIso8601String()
+            : null,
+      ),
+    );
+
+    state = result.fold((failure) => ErrorState(failure), (_) => SuccessState(null));
+  }
+}

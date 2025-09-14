@@ -1,6 +1,18 @@
-import 'package:idez_test/src/core/extensions/date_time_extension.dart';
 import 'package:mobx/mobx.dart';
-import '../../domain/entities/task_entity.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../../core/errors/failure.dart';
+import '../../../../core/state/view_model_state.dart';
+import '../../../shared/domain/entities/task_entity.dart';
+import '../../../shared/domain/entities/category_entity.dart';
+
+// use cases
+import '../../../shared/domain/usecases/get_all_tasks_use_case.dart';
+import '../../../shared/domain/usecases/get_all_done_tasks_use_case.dart';
+import '../../../shared/domain/usecases/get_all_categories_use_case.dart';
+import '../../../shared/domain/usecases/delete_from_id_use_case.dart';
+import '../../../shared/domain/usecases/delete_from_id_range_use_case.dart';
+
 import '../models/pill_tab_enum.dart';
 
 part 'home_view_model.g.dart';
@@ -8,102 +20,56 @@ part 'home_view_model.g.dart';
 class HomeViewModel = _HomeViewModelBase with _$HomeViewModel;
 
 abstract class _HomeViewModelBase with Store {
+  final GetAllCategoriesUseCase _allCategoriesUseCase;
+  final GetAllDoneTasksUseCase _allDoneTasksUseCase;
+  final GetAllTasksUseCase _allTasksUseCase;
+  final DeleteFromIdUseCase _deleteFromIdUseCase;
+  final DeleteFromIdRangeUseCase _deleteFromIdRangeUseCase;
+
+  _HomeViewModelBase(
+    this._allCategoriesUseCase,
+    this._allDoneTasksUseCase,
+    this._allTasksUseCase,
+    this._deleteFromIdUseCase,
+    this._deleteFromIdRangeUseCase,
+  );
+
   // ----------------------------
-  // Navegação
+  // States and Results
+  // ----------------------------
+  @observable
+  ViewModelState<Failure, List<TaskEntity>> tasksState = InitialState();
+
+  @observable
+  ViewModelState<Failure, List<CategoryEntity>> categoriesState = InitialState();
+
+  @observable
+  ViewModelState<Failure, List<TaskEntity>> doneTasksState = InitialState();
+
+  @observable
+  ViewModelState<Failure, void> deleteRangeState = InitialState();
+
+  @observable
+  ViewModelState<Failure, void> deleteOneState = InitialState();
+
+  // ----------------------------
+  // Navigation (aba)
   // ----------------------------
   @observable
   PillTab currentTab = PillTab.home;
 
   // ----------------------------
-  // Estado das tarefas
+  // Collections
   // ----------------------------
   @observable
-  ObservableList<TaskEntity> tasks = ObservableList.of([
-    TaskEntity(
-      id: "1",
-      title: "Fazer 30 minutos de exercício",
-      done: false,
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      dueDate: DateTime.now().add(const Duration(days: 1)),
-      categoryId: "saude",
-    ),
-    TaskEntity(
-      id: "2",
-      title: "Estudar Flutter por 1 hora",
-      done: false,
-      createdAt: DateTime.now(),
-      dueDate: DateTime.now().add(const Duration(days: 2)),
-      categoryId: "estudo",
-    ),
-    TaskEntity(
-      id: "3",
-      title: "Comprar frutas no mercado",
-      done: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      dueDate: null,
-      categoryId: "compras",
-    ),
-    TaskEntity(
-      id: "4",
-      title: "Ler 20 páginas do livro",
-      done: false,
-      createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-      dueDate: DateTime.now().add(const Duration(days: 3)),
-      categoryId: "leitura",
-    ),
-    TaskEntity(
-      id: "5",
-      title: "Beber 2 litros de água",
-      done: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      dueDate: null,
-      categoryId: "saude",
-    ),
-    TaskEntity(
-      id: "6",
-      title: "Revisar código do projeto",
-      done: false,
-      createdAt: DateTime.now(),
-      dueDate: DateTime.now().add(const Duration(days: 1)),
-      categoryId: "trabalho",
-    ),
-    TaskEntity(
-      id: "7",
-      title: "Assistir palestra online",
-      done: false,
-      createdAt: DateTime.now().subtract(const Duration(hours: 12)),
-      dueDate: DateTime.now().add(const Duration(days: 5)),
-      categoryId: "aprendizado",
-    ),
-    TaskEntity(
-      id: "8",
-      title: "Ligar para João",
-      done: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 3)),
-      dueDate: null,
-      categoryId: "pessoal",
-    ),
-    TaskEntity(
-      id: "9",
-      title: "Arrumar o quarto",
-      done: false,
-      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-      dueDate: DateTime.now().add(const Duration(days: 1)),
-      categoryId: "casa",
-    ),
-    TaskEntity(
-      id: "10",
-      title: "Preparar apresentação",
-      done: false,
-      createdAt: DateTime.now().subtract(const Duration(hours: 8)),
-      dueDate: DateTime.now().add(const Duration(days: 4)),
-      categoryId: "trabalho",
-    ),
-  ]);
+  ObservableList<TaskEntity> tasks = ObservableList.of([]);
 
-  // ----------------------------
-  // Lista Organizada de Tarefas Concluídas
-  // ----------------------------
+  @computed
+  List<TaskEntity> get lastTasks {
+    final sorted = [...tasks]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return sorted.take(10).toList(growable: false);
+  }
+
   @computed
   List<TaskEntity> get doneTasks {
     final list = tasks.where((t) => t.done).toList(growable: false);
@@ -112,7 +78,7 @@ abstract class _HomeViewModelBase with Store {
   }
 
   // ----------------------------
-  // Seleção
+  // Multiple Selection
   // ----------------------------
   @observable
   ObservableSet<String> selectedTasksIDs = ObservableSet<String>();
@@ -123,7 +89,6 @@ abstract class _HomeViewModelBase with Store {
   @computed
   int get selectedCount => selectedTasksIDs.length;
 
-  @action
   bool isSelected(String id) => selectedTasksIDs.contains(id);
 
   @action
@@ -135,12 +100,8 @@ abstract class _HomeViewModelBase with Store {
   @action
   void toggleSelection(String id) {
     if (!isSelectionMode) return;
-    if (!selectedTasksIDs.remove(id)) {
-      selectedTasksIDs.add(id);
-    }
-    if (selectedTasksIDs.isEmpty) {
-      isSelectionMode = false;
-    }
+    if (!selectedTasksIDs.remove(id)) selectedTasksIDs.add(id);
+    if (selectedTasksIDs.isEmpty) isSelectionMode = false;
   }
 
   @action
@@ -149,22 +110,58 @@ abstract class _HomeViewModelBase with Store {
     isSelectionMode = false;
   }
 
+  // ----------------------------
+  // Optimistic Exclusion + Undo
+  // ----------------------------
+
   @action
-  void deleteSelectedTasks() {
-    tasks.removeWhere((t) => selectedTasksIDs.contains(t.id));
+  List<TaskEntity> removeByIdsOptimistic(Iterable<String> ids) {
+    final idSet = ids.toSet();
+    final removed = tasks.where((t) => idSet.contains(t.id)).toList(growable: false);
+    tasks.removeWhere((t) => idSet.contains(t.id));
     clearSelection();
+    return removed;
+  }
+
+  @action
+  void restoreTasks(List<TaskEntity> items) {
+    tasks.addAll(items);
+    tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  @action
+  Future<void> commitDeleteRange(Iterable<String> ids) async {
+    deleteRangeState = LoadingState();
+    final res = await _deleteFromIdRangeUseCase(ids);
+    deleteRangeState = res.fold((f) => ErrorState(f), (_) => SuccessState(null));
+  }
+
+  @action
+  TaskEntity? removeByIdOptimistic(String id) {
+    final idx = tasks.indexWhere((t) => t.id == id);
+    if (idx == -1) return null;
+    final removed = tasks[idx];
+    tasks.removeAt(idx);
+    selectedTasksIDs.remove(id);
+    if (selectedTasksIDs.isEmpty) isSelectionMode = false;
+    return removed;
+  }
+
+  @action
+  Future<void> commitDeleteOne(String id) async {
+    deleteOneState = LoadingState();
+    final res = await _deleteFromIdUseCase(id);
+    deleteOneState = res.fold((f) => ErrorState(f), (_) => SuccessState(null));
   }
 
   // ----------------------------
-  // Ações de tarefa
+  // Mutations (toggle done / update)
   // ----------------------------
-
   @action
   void setDone(String id, bool done) {
     final idx = tasks.indexWhere((t) => t.id == id);
     if (idx == -1) return;
-    final old = tasks[idx];
-    tasks[idx] = old.copyWith(done: done);
+    tasks[idx] = tasks[idx].copyWith(done: done);
   }
 
   @action
@@ -179,36 +176,65 @@ abstract class _HomeViewModelBase with Store {
     );
   }
 
-  @action
-  void deleteTask(String id) {
-    tasks.removeWhere((t) => t.id == id);
-    selectedTasksIDs.remove(id);
-    if (selectedTasksIDs.isEmpty) isSelectionMode = false;
-  }
-
   // ----------------------------
-  // Contagens para o "HomeOptionsGrid"
+  // Counts
   // ----------------------------
   @computed
   int get tasksCount => tasks.length;
 
   @computed
   int get pendingTasksCount {
-    return tasks.where((t) => !t.done && t.dueDate != null && t.dueDate!.isOlderThanNow).length;
+    final now = DateTime.now();
+
+    return tasks.where((t) => !t.done && t.dueDate != null && t.dueDate!.isBefore(now)).length;
   }
 
   @computed
   int get overdueTasksCount {
     final now = DateTime.now();
-    return tasks.where((t) => !t.done && t.dueDate != null && t.dueDate!.isAfter(now)).length;
+
+    return tasks.where((t) => !t.done && (t.dueDate == null || t.dueDate!.isAfter(now))).length;
   }
 
   @computed
   int get categoriesCount {
     final set = <String>{};
     for (final t in tasks) {
-      if (t.categoryId != null && t.categoryId!.isNotEmpty) set.add(t.categoryId!);
+      final c = t.categoryId;
+      if (c != null && c.isNotEmpty) set.add(c);
     }
     return set.length;
+  }
+
+  // ----------------------------
+  // Initial Setup
+  // ----------------------------
+  @action
+  Future<void> loadAllData() async {
+    tasksState = LoadingState();
+    categoriesState = LoadingState();
+    doneTasksState = LoadingState();
+
+    final results = await Future.wait([
+      _allTasksUseCase(),
+      _allCategoriesUseCase(),
+      _allDoneTasksUseCase(),
+    ]);
+
+    final tasksResult = results[0] as Either<Failure, List<TaskEntity>>;
+    final categoriesResult = results[1] as Either<Failure, List<CategoryEntity>>;
+    final doneResult = results[2] as Either<Failure, List<TaskEntity>>;
+
+    tasksResult.fold((l) => tasksState = ErrorState(l), (r) {
+      tasks = ObservableList.of(r);
+      tasksState = SuccessState(r);
+    });
+
+    categoriesResult.fold(
+      (l) => categoriesState = ErrorState(l),
+      (r) => categoriesState = SuccessState(r),
+    );
+
+    doneResult.fold((l) => doneTasksState = ErrorState(l), (r) => doneTasksState = SuccessState(r));
   }
 }

@@ -13,6 +13,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: AppRoutes.home,
       routes: buildRouter(),
+      onGenerateRoute: buildOnGenerateRoute,
       theme: AppTheme.light,
     );
   }

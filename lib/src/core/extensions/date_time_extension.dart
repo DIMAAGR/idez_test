@@ -20,6 +20,16 @@ extension DateTimeExtension on DateTime {
     }
   }
 
+  String toDDMMYYYY() {
+    final dateFormat = DateFormat('dd/MM/yyyy');
+    return dateFormat.format(this);
+  }
+
+  String toHHMM() {
+    final timeFormat = DateFormat('HH:mm');
+    return timeFormat.format(this);
+  }
+
   bool get isToday {
     final now = DateTime.now();
     return year == now.year && month == now.month && day == now.day;
@@ -37,7 +47,6 @@ extension DateTimeExtension on DateTime {
 
   bool get isOlderThanNow {
     final now = DateTime.now();
-    print('isOlderThanNow: $this < $now = ${isBefore(now)}');
     return isBefore(now);
   }
 }

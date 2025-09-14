@@ -16,6 +16,8 @@ dependencies:
   intl: ^0.20.2
   mobx: ^2.5.0
   flutter_mobx: ^2.3.0
+  dartz: ^0.10.1
+  mask_text_input_formatter: ^2.9.0
 
 dev_dependencies:
   mobx_codegen: ^2.4.9

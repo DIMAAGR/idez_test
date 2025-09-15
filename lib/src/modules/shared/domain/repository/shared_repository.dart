@@ -11,5 +11,5 @@ abstract class SharedRepository {
   Future<Either<Failure, List<CategoryEntity>>> getAllCategories();
   Future<Either<Failure, void>> deleteFromId(String id);
   Future<Either<Failure, void>> deleteFromIdRange(Iterable<String> ids);
-  Future<Either<Failure, void>> updateFromId(id, TaskModel task);
+  Future<Either<Failure, void>> updateFromId(String id, TaskModel task);
 }

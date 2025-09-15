@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:idez_test/src/core/mixin/pending_deletion_mixin.dart';
 import 'package:idez_test/src/core/router/app_routes.dart';
 import 'package:idez_test/src/modules/home/presentation/view_model/home_view_model.dart';
 import 'package:idez_test/src/modules/home/presentation/widgets/home_title.dart';
@@ -10,9 +11,34 @@ import '../../../../../core/state/view_model_state.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../widgets/home_options_grid.dart';
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   final HomeViewModel viewModel;
   const HomeTab({super.key, required this.viewModel});
+
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
+  HomeViewModel get viewModel => widget.viewModel;
+
+  Future<void> _goToBoard(String arg) async {
+    await commitPendingIfAny(viewModel.commitDeleteRange);
+    await Navigator.of(context).pushNamed(AppRoutes.board, arguments: arg);
+    if (mounted) viewModel.loadAllData();
+  }
+
+  Future<void> _goToCategories() async {
+    await commitPendingIfAny(viewModel.commitDeleteRange);
+    await Navigator.of(context).pushNamed(AppRoutes.categories);
+    if (mounted) viewModel.loadAllData();
+  }
+
+  Future<void> _goToEditTask(dynamic t) async {
+    await commitPendingIfAny(viewModel.commitDeleteRange);
+    final ok = await Navigator.of(context).pushNamed(AppRoutes.editTask, arguments: t);
+    if (ok == true && mounted) viewModel.loadAllData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +51,15 @@ class HomeTab extends StatelessWidget {
             children: [
               FadeIn(
                 delay: const Duration(milliseconds: 200),
-                child: HomeTitle(onSettingsPressed: () {}),
+                child: HomeTitle(
+                  onSettingsPressed: () async {
+                    // Exemplo: se um botão abrir settings no futuro, confirme antes
+                    await commitPendingIfAny(viewModel.commitDeleteRange);
+                    // Navigator.pushNamed(context, AppRoutes.settings);
+                  },
+                ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               FadeIn(
                 delay: const Duration(milliseconds: 300),
                 child: Observer(
@@ -39,28 +71,20 @@ class HomeTab extends StatelessWidget {
                       categoriesCount: viewModel.categoriesCount,
                       overdueTasksCount: viewModel.overdueTasksCount,
                       pendingTasksCount: viewModel.pendingTasksCount,
-                      onTasksPressed: () => Navigator.of(context)
-                          .pushNamed(AppRoutes.board, arguments: 'ALL')
-                          .then((_) => viewModel.loadAllData()),
-                      onCategoriesPressed: () => Navigator.of(
-                        context,
-                      ).pushNamed(AppRoutes.categories).then((_) => viewModel.loadAllData()),
-                      onOverdueTasksPressed: () => Navigator.of(context)
-                          .pushNamed(AppRoutes.board, arguments: 'OVERDUE')
-                          .then((_) => viewModel.loadAllData()),
-                      onPendingTasksPressed: () => Navigator.of(context)
-                          .pushNamed(AppRoutes.board, arguments: 'PENDING')
-                          .then((_) => viewModel.loadAllData()),
+                      onTasksPressed: () => _goToBoard('ALL'),
+                      onCategoriesPressed: () => _goToCategories(),
+                      onOverdueTasksPressed: () => _goToBoard('OVERDUE'),
+                      onPendingTasksPressed: () => _goToBoard('PENDING'),
                     );
                   },
                 ),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               FadeIn(
                 delay: const Duration(milliseconds: 400),
                 child: Text('Recentes', style: AppTheme.textStyles.body1Bold),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               Observer(
                 builder: (context) {
@@ -86,7 +110,7 @@ class HomeTab extends StatelessWidget {
                     cacheExtent: 0,
                     shrinkWrap: true,
                     addAutomaticKeepAlives: false,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: viewModel.lastTasks.length,
                     separatorBuilder: (context, index) => FadeIn(
                       delay: Duration(milliseconds: 500 + index * 100),
@@ -113,39 +137,20 @@ class HomeTab extends StatelessWidget {
                               onTap: () => viewModel.toggleSelection(t.id),
                               onLongPress: () => viewModel.startSelection(t.id),
                               onChanged: (done) => viewModel.setDone(t.id, done),
-                              onEdit: () {
-                                Navigator.of(
-                                  context,
-                                ).pushNamed(AppRoutes.editTask, arguments: t).then((value) {
-                                  if (value == true) {
-                                    viewModel.loadAllData();
-                                  }
-                                });
-                              },
+
+                              onEdit: () => _goToEditTask(t),
 
                               onDelete: () {
                                 final removed = viewModel.removeByIdOptimistic(t.id);
+                                if (removed == null) return;
 
-                                bool undone = false;
-                                final bar = ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('tarefa excluída'),
-                                    action: SnackBarAction(
-                                      label: 'Desfazer',
-                                      onPressed: () {
-                                        undone = true;
-                                        viewModel.restoreTasks([removed!]);
-                                      },
-                                    ),
-                                    duration: const Duration(seconds: 4),
-                                  ),
+                                showPendingDeletion(
+                                  context: context,
+                                  ids: [t.id],
+                                  message: 'Tarefa excluída',
+                                  restore: () => viewModel.restoreTasks([removed]),
+                                  commit: (ids) => viewModel.commitDeleteRange(ids),
                                 );
-
-                                bar.closed.then((_) {
-                                  if (!undone) {
-                                    viewModel.commitDeleteOne(t.id);
-                                  }
-                                });
                               },
                             );
                           },
@@ -155,7 +160,7 @@ class HomeTab extends StatelessWidget {
                   );
                 },
               ),
-              SizedBox(height: 56),
+              const SizedBox(height: 56),
             ],
           ),
         ),

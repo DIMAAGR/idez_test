@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:idez_test/src/core/router/app_routes.dart';
 import 'package:idez_test/src/modules/shared/domain/entities/task_entity.dart';
+import '../../modules/board/presentation/view/board_view.dart';
+import '../../modules/board/presentation/view_model/board_view_model.dart';
 import '../../modules/home/presentation/view/home_view.dart';
 import '../../modules/home/presentation/view_model/home_view_model.dart';
 import '../../modules/task/presentation/view/task_view.dart';
@@ -35,6 +37,10 @@ Route<dynamic>? buildOnGenerateRoute(RouteSettings settings) {
   final getIt = GetIt.instance;
 
   switch (settings.name) {
+    case AppRoutes.board:
+      return _slideUpRoute(
+        BoardView(viewModel: getIt<BoardViewModel>(), boardType: settings.arguments as String?),
+      );
     case AppRoutes.createTask:
       return _slideUpRoute(TaskView(viewModel: getIt<TaskViewModel>(), isCreate: true));
     case AppRoutes.editTask:

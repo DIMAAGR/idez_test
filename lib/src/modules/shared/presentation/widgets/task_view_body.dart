@@ -5,12 +5,15 @@ class TaskViewBody extends StatelessWidget {
   final CrossAxisAlignment? crossAxisAlignment;
   final MainAxisAlignment? mainAxisAlignment;
   final EdgeInsets? padding;
+  final bool hasScrollableChild;
+
   const TaskViewBody({
     super.key,
     required this.children,
     this.crossAxisAlignment,
     this.mainAxisAlignment,
     this.padding,
+    this.hasScrollableChild = false,
   });
 
   @override
@@ -18,17 +21,26 @@ class TaskViewBody extends StatelessWidget {
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
+          if (hasScrollableChild) {
+            return Padding(
+              padding: padding ?? EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: crossAxisAlignment ?? CrossAxisAlignment.start,
+                mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
+                children: children,
+              ),
+            );
+          }
+
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Padding(
-                  padding: padding ?? EdgeInsets.zero,
-                  child: Column(
-                    crossAxisAlignment: crossAxisAlignment ?? CrossAxisAlignment.center,
-                    mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceAround,
-                    children: children,
-                  ),
+              child: Padding(
+                padding: padding ?? EdgeInsets.zero,
+                child: Column(
+                  crossAxisAlignment: crossAxisAlignment ?? CrossAxisAlignment.center,
+                  mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceAround,
+                  children: children,
                 ),
               ),
             ),

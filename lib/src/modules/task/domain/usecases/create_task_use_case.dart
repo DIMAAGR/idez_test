@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
-import '../../data/models/task_model.dart';
+import '../../../shared/data/models/task_model.dart';
 import '../repository/task_repository.dart';
 
 abstract class CreateTaskUseCase {

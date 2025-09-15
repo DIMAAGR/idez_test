@@ -12,6 +12,13 @@ class AppTextStyles {
     color: _colors.black,
   );
 
+  TextStyle get h6 => TextStyle(
+    fontSize: 20,
+    fontFamily: 'Montserrat',
+    fontWeight: FontWeight.w700,
+    color: _colors.black,
+  );
+
   TextStyle get body1Regular => TextStyle(
     fontSize: 16,
     fontFamily: 'Roboto',

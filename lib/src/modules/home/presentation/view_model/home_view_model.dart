@@ -1,8 +1,10 @@
+import 'package:idez_test/src/modules/shared/domain/usecases/update_task_from_id_use_case.dart';
 import 'package:mobx/mobx.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../../../core/state/view_model_state.dart';
+import '../../../shared/data/models/task_model.dart';
 import '../../../shared/domain/entities/task_entity.dart';
 import '../../../shared/domain/entities/category_entity.dart';
 
@@ -25,6 +27,7 @@ abstract class _HomeViewModelBase with Store {
   final GetAllTasksUseCase _allTasksUseCase;
   final DeleteFromIdUseCase _deleteFromIdUseCase;
   final DeleteFromIdRangeUseCase _deleteFromIdRangeUseCase;
+  final UpdateTaskFromIdUseCase _updateTaskFromIdUseCase;
 
   _HomeViewModelBase(
     this._allCategoriesUseCase,
@@ -32,6 +35,7 @@ abstract class _HomeViewModelBase with Store {
     this._allTasksUseCase,
     this._deleteFromIdUseCase,
     this._deleteFromIdRangeUseCase,
+    this._updateTaskFromIdUseCase,
   );
 
   // ----------------------------
@@ -51,9 +55,11 @@ abstract class _HomeViewModelBase with Store {
 
   @observable
   ViewModelState<Failure, void> deleteOneState = InitialState();
+  @observable
+  ViewModelState<Failure, void> updateTaskState = InitialState();
 
   // ----------------------------
-  // Navigation (aba)
+  // Navigation
   // ----------------------------
   @observable
   PillTab currentTab = PillTab.home;
@@ -158,22 +164,14 @@ abstract class _HomeViewModelBase with Store {
   // Mutations (toggle done / update)
   // ----------------------------
   @action
-  void setDone(String id, bool done) {
+  Future<void> setDone(String id, bool done) async {
+    updateTaskState = LoadingState();
     final idx = tasks.indexWhere((t) => t.id == id);
     if (idx == -1) return;
     tasks[idx] = tasks[idx].copyWith(done: done);
-  }
+    final result = await _updateTaskFromIdUseCase(id, TaskModel.fromEntity(tasks[idx]));
 
-  @action
-  void updateTask(String id, {String? title, String? categoryId, DateTime? dueDate}) {
-    final idx = tasks.indexWhere((t) => t.id == id);
-    if (idx == -1) return;
-    final old = tasks[idx];
-    tasks[idx] = old.copyWith(
-      title: title ?? old.title,
-      categoryId: categoryId ?? old.categoryId,
-      dueDate: dueDate ?? old.dueDate,
-    );
+    updateTaskState = result.fold((l) => ErrorState(l), (r) => SuccessState(null));
   }
 
   // ----------------------------
@@ -183,14 +181,14 @@ abstract class _HomeViewModelBase with Store {
   int get tasksCount => tasks.length;
 
   @computed
-  int get pendingTasksCount {
+  int get overdueTasksCount {
     final now = DateTime.now();
 
     return tasks.where((t) => !t.done && t.dueDate != null && t.dueDate!.isBefore(now)).length;
   }
 
   @computed
-  int get overdueTasksCount {
+  int get pendingTasksCount {
     final now = DateTime.now();
 
     return tasks.where((t) => !t.done && (t.dueDate == null || t.dueDate!.isAfter(now))).length;

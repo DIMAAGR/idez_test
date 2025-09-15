@@ -36,9 +36,9 @@ class TaskTile extends StatelessWidget {
   Color _dateColor() {
     if (isCompleted) return AppTheme.colors.green;
     if (date == null) return AppTheme.colors.darkGrey;
+    if (date!.isOlderThanNow) return AppTheme.colors.red;
     if (date!.isToday) return AppTheme.colors.orange;
     if (date!.isTomorrow) return AppTheme.colors.blue;
-    if (date!.isYesterday) return AppTheme.colors.red;
     return AppTheme.colors.darkGrey;
   }
 

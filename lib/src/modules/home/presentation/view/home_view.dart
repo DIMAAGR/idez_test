@@ -41,6 +41,9 @@ class _HomeViewState extends State<HomeView> {
       reaction((_) => widget.viewModel.doneTasksState, (state) {
         if (state is ErrorState) _showError(state);
       }),
+      reaction((_) => widget.viewModel.updateTaskState, (state) {
+        if (state is ErrorState) _showError(state);
+      }),
 
       reaction((_) => widget.viewModel.deleteRangeState, (state) {
         if (state is ErrorState) {
@@ -69,7 +72,9 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void dispose() {
-    for (final d in _disposers) d();
+    for (final d in _disposers) {
+      d();
+    }
     super.dispose();
   }
 

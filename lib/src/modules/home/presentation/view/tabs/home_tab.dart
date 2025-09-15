@@ -36,10 +36,16 @@ class HomeTab extends StatelessWidget {
                       categoriesCount: viewModel.categoriesCount,
                       overdueTasksCount: viewModel.overdueTasksCount,
                       pendingTasksCount: viewModel.pendingTasksCount,
-                      onTasksPressed: () {},
+                      onTasksPressed: () => Navigator.of(context)
+                          .pushNamed(AppRoutes.board, arguments: 'ALL')
+                          .then((_) => viewModel.loadAllData()),
                       onCategoriesPressed: () {},
-                      onOverdueTasksPressed: () {},
-                      onPendingTasksPressed: () {},
+                      onOverdueTasksPressed: () => Navigator.of(context)
+                          .pushNamed(AppRoutes.board, arguments: 'OVERDUE')
+                          .then((_) => viewModel.loadAllData()),
+                      onPendingTasksPressed: () => Navigator.of(context)
+                          .pushNamed(AppRoutes.board, arguments: 'PENDING')
+                          .then((_) => viewModel.loadAllData()),
                     );
                   },
                 ),

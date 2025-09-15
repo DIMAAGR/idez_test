@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:idez_test/src/core/router/app_routes.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/fade_in.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/task_tile.dart';
 
@@ -76,8 +77,15 @@ class DoneTab extends StatelessWidget {
                               onTap: () => viewModel.toggleSelection(t.id),
                               onLongPress: () => viewModel.startSelection(t.id),
                               onChanged: (done) => viewModel.setDone(t.id, done),
-                              onEdit: () =>
-                                  viewModel.updateTask(t.id, title: '${t.title} (editado)'),
+                              onEdit: () {
+                                Navigator.of(
+                                  context,
+                                ).pushNamed(AppRoutes.editTask, arguments: t).then((value) {
+                                  if (value == true) {
+                                    viewModel.loadAllData();
+                                  }
+                                });
+                              },
                               onDelete: () {
                                 () {
                                   final removed = viewModel.removeByIdOptimistic(t.id);

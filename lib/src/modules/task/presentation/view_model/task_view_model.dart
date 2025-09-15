@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:idez_test/src/core/errors/failure.dart';
-import 'package:idez_test/src/core/state/view_model_state.dart';
-import 'package:idez_test/src/modules/task/domain/usecases/create_task_use_case.dart';
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
 
-import '../../data/models/task_model.dart';
-import '../../domain/usecases/edit_task_use_case.dart';
+import '../../../../core/errors/failure.dart';
+import '../../../../core/state/view_model_state.dart';
+import '../../../shared/data/models/task_model.dart';
+import '../../../shared/domain/usecases/update_task_from_id_use_case.dart';
+import '../../domain/usecases/create_task_use_case.dart';
 
 part 'task_view_model.g.dart';
 
@@ -14,7 +14,7 @@ class TaskViewModel = _TaskViewModelBase with _$TaskViewModel;
 
 abstract class _TaskViewModelBase with Store {
   final CreateTaskUseCase _createTaskUseCase;
-  final EditTaskUseCase _editTaskUseCase;
+  final UpdateTaskFromIdUseCase _editTaskUseCase;
 
   _TaskViewModelBase(this._createTaskUseCase, this._editTaskUseCase);
 

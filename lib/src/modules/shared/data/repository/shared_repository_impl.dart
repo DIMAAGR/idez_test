@@ -5,6 +5,7 @@ import '../../../../core/errors/failure.dart';
 import '../../../shared/data/data_source/task_local_data_source.dart';
 import '../../../shared/domain/entities/category_entity.dart';
 import '../../../shared/domain/entities/task_entity.dart';
+import '../models/task_model.dart';
 
 class SharedRepositoryImpl implements SharedRepository {
   final TasksLocalDataSource local;
@@ -64,6 +65,20 @@ class SharedRepositoryImpl implements SharedRepository {
       return Right(doneTasks.map((m) => m.toEntity()).toList());
     } catch (e, s) {
       return Left(StorageFailure('Failed to load done tasks', cause: e, stackTrace: s));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateFromId(id, TaskModel task) async {
+    try {
+      final list = await local.getAllTasks();
+      final idx = list.indexWhere((t) => t.id == id);
+      if (idx == -1) return Left(NotFoundFailure('Task not found'));
+      list[idx] = task;
+      await local.saveAllTasks(list);
+      return Right(null);
+    } catch (e, s) {
+      return Left(StorageFailure('Failed to edit task', cause: e, stackTrace: s));
     }
   }
 }

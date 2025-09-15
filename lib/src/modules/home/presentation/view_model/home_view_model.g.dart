@@ -39,19 +39,19 @@ mixin _$HomeViewModel on _HomeViewModelBase, Store {
     () => super.tasksCount,
     name: '_HomeViewModelBase.tasksCount',
   )).value;
-  Computed<int>? _$pendingTasksCountComputed;
-
-  @override
-  int get pendingTasksCount => (_$pendingTasksCountComputed ??= Computed<int>(
-    () => super.pendingTasksCount,
-    name: '_HomeViewModelBase.pendingTasksCount',
-  )).value;
   Computed<int>? _$overdueTasksCountComputed;
 
   @override
   int get overdueTasksCount => (_$overdueTasksCountComputed ??= Computed<int>(
     () => super.overdueTasksCount,
     name: '_HomeViewModelBase.overdueTasksCount',
+  )).value;
+  Computed<int>? _$pendingTasksCountComputed;
+
+  @override
+  int get pendingTasksCount => (_$pendingTasksCountComputed ??= Computed<int>(
+    () => super.pendingTasksCount,
+    name: '_HomeViewModelBase.pendingTasksCount',
   )).value;
   Computed<int>? _$categoriesCountComputed;
 
@@ -151,6 +151,24 @@ mixin _$HomeViewModel on _HomeViewModelBase, Store {
     });
   }
 
+  late final _$updateTaskStateAtom = Atom(
+    name: '_HomeViewModelBase.updateTaskState',
+    context: context,
+  );
+
+  @override
+  ViewModelState<Failure, void> get updateTaskState {
+    _$updateTaskStateAtom.reportRead();
+    return super.updateTaskState;
+  }
+
+  @override
+  set updateTaskState(ViewModelState<Failure, void> value) {
+    _$updateTaskStateAtom.reportWrite(value, super.updateTaskState, () {
+      super.updateTaskState = value;
+    });
+  }
+
   late final _$currentTabAtom = Atom(
     name: '_HomeViewModelBase.currentTab',
     context: context,
@@ -245,6 +263,16 @@ mixin _$HomeViewModel on _HomeViewModelBase, Store {
     return _$commitDeleteOneAsyncAction.run(() => super.commitDeleteOne(id));
   }
 
+  late final _$setDoneAsyncAction = AsyncAction(
+    '_HomeViewModelBase.setDone',
+    context: context,
+  );
+
+  @override
+  Future<void> setDone(String id, bool done) {
+    return _$setDoneAsyncAction.run(() => super.setDone(id, done));
+  }
+
   late final _$loadAllDataAsyncAction = AsyncAction(
     '_HomeViewModelBase.loadAllData',
     context: context,
@@ -333,40 +361,6 @@ mixin _$HomeViewModel on _HomeViewModelBase, Store {
   }
 
   @override
-  void setDone(String id, bool done) {
-    final _$actionInfo = _$_HomeViewModelBaseActionController.startAction(
-      name: '_HomeViewModelBase.setDone',
-    );
-    try {
-      return super.setDone(id, done);
-    } finally {
-      _$_HomeViewModelBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void updateTask(
-    String id, {
-    String? title,
-    String? categoryId,
-    DateTime? dueDate,
-  }) {
-    final _$actionInfo = _$_HomeViewModelBaseActionController.startAction(
-      name: '_HomeViewModelBase.updateTask',
-    );
-    try {
-      return super.updateTask(
-        id,
-        title: title,
-        categoryId: categoryId,
-        dueDate: dueDate,
-      );
-    } finally {
-      _$_HomeViewModelBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   String toString() {
     return '''
 tasksState: ${tasksState},
@@ -374,6 +368,7 @@ categoriesState: ${categoriesState},
 doneTasksState: ${doneTasksState},
 deleteRangeState: ${deleteRangeState},
 deleteOneState: ${deleteOneState},
+updateTaskState: ${updateTaskState},
 currentTab: ${currentTab},
 tasks: ${tasks},
 selectedTasksIDs: ${selectedTasksIDs},
@@ -382,8 +377,8 @@ lastTasks: ${lastTasks},
 doneTasks: ${doneTasks},
 selectedCount: ${selectedCount},
 tasksCount: ${tasksCount},
-pendingTasksCount: ${pendingTasksCount},
 overdueTasksCount: ${overdueTasksCount},
+pendingTasksCount: ${pendingTasksCount},
 categoriesCount: ${categoriesCount}
     ''';
   }

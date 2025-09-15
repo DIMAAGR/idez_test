@@ -113,7 +113,7 @@ class _CategoriesManageViewState extends State<CategoriesManageView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.isCreate ? 'Criar uma nova tarefa' : 'Editar tarefa',
+            widget.isCreate ? 'Criar uma nova categoria' : 'Editar categoria',
             style: AppTheme.textStyles.h5,
           ),
           SizedBox(height: 16),

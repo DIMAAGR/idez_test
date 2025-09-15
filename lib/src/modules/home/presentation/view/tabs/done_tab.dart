@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:idez_test/src/core/mixin/pending_deletion_mixin.dart';
 import 'package:idez_test/src/core/router/app_routes.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/fade_in.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/task_tile.dart';
@@ -7,9 +8,22 @@ import 'package:idez_test/src/modules/shared/presentation/widgets/task_tile.dart
 import '../../../../../core/theme/app_theme.dart';
 import '../../view_model/home_view_model.dart';
 
-class DoneTab extends StatelessWidget {
+class DoneTab extends StatefulWidget {
   final HomeViewModel viewModel;
   const DoneTab({super.key, required this.viewModel});
+
+  @override
+  State<DoneTab> createState() => _DoneTabState();
+}
+
+class _DoneTabState extends State<DoneTab> with PendingDeletionMixin {
+  HomeViewModel get vm => widget.viewModel;
+
+  Future<void> _goToEditTask(dynamic t) async {
+    await commitPendingIfAny(vm.commitDeleteRange);
+    final ok = await Navigator.of(context).pushNamed(AppRoutes.editTask, arguments: t);
+    if (ok == true && mounted) vm.loadAllData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +42,7 @@ class DoneTab extends StatelessWidget {
             Expanded(
               child: Observer(
                 builder: (_) {
-                  final done = viewModel.doneTasks;
+                  final done = vm.doneTasks;
 
                   if (done.isEmpty) {
                     return FadeIn(
@@ -60,50 +74,35 @@ class DoneTab extends StatelessWidget {
                         duration: const Duration(milliseconds: 260),
                         child: Observer(
                           builder: (_) {
-                            final selected = viewModel.selectedTasksIDs.contains(t.id);
-                            final isSelectionMode = viewModel.isSelectionMode;
+                            final selected = vm.selectedTasksIDs.contains(t.id);
+                            final isSelectionMode = vm.isSelectionMode;
 
                             return TaskTile(
                               id: t.id,
                               title: t.title,
                               date: t.dueDate,
                               isCompleted: t.done,
-                              category: viewModel.getCategoryNameById(t.categoryId) ?? 'nenhuma',
+                              category: vm.getCategoryNameById(t.categoryId) ?? 'nenhuma',
                               selected: selected,
                               isSelectionEnabled: isSelectionMode,
-                              onTap: () => viewModel.toggleSelection(t.id),
-                              onLongPress: () => viewModel.startSelection(t.id),
-                              onChanged: (done) => viewModel.setDone(t.id, done),
-                              onEdit: () {
-                                Navigator.of(
-                                  context,
-                                ).pushNamed(AppRoutes.editTask, arguments: t).then((ok) {
-                                  if (ok == true) viewModel.loadAllData();
-                                });
-                              },
+                              onTap: () => vm.toggleSelection(t.id),
+                              onLongPress: () => vm.startSelection(t.id),
+                              onChanged: (done) => vm.setDone(t.id, done),
+
+                              onEdit: () => _goToEditTask(t),
+
                               onDelete: () {
-                                final removed = viewModel.removeByIdOptimistic(t.id);
+                                // Remoção otimista + snackbar com desfazer
+                                final removed = vm.removeByIdOptimistic(t.id);
+                                if (removed == null) return;
 
-                                bool undone = false;
-                                final bar = ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Text('tarefa excluída'),
-                                    action: SnackBarAction(
-                                      label: 'Desfazer',
-                                      onPressed: () {
-                                        undone = true;
-                                        viewModel.restoreTasks([removed!]);
-                                      },
-                                    ),
-                                    duration: const Duration(seconds: 4),
-                                  ),
+                                showPendingDeletion(
+                                  context: context,
+                                  ids: [t.id],
+                                  message: 'Tarefa excluída',
+                                  restore: () => vm.restoreTasks([removed]),
+                                  commit: (ids) => vm.commitDeleteRange(ids),
                                 );
-
-                                bar.closed.then((_) {
-                                  if (!undone) {
-                                    viewModel.commitDeleteOne(t.id);
-                                  }
-                                });
                               },
                             );
                           },

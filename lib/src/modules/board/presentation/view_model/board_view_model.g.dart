@@ -68,6 +68,24 @@ mixin _$BoardViewModel on _BoardViewModel, Store {
     });
   }
 
+  late final _$categoriesStateAtom = Atom(
+    name: '_BoardViewModel.categoriesState',
+    context: context,
+  );
+
+  @override
+  ViewModelState<Failure, List<CategoryEntity>> get categoriesState {
+    _$categoriesStateAtom.reportRead();
+    return super.categoriesState;
+  }
+
+  @override
+  set categoriesState(ViewModelState<Failure, List<CategoryEntity>> value) {
+    _$categoriesStateAtom.reportWrite(value, super.categoriesState, () {
+      super.categoriesState = value;
+    });
+  }
+
   late final _$deleteRangeStateAtom = Atom(
     name: '_BoardViewModel.deleteRangeState',
     context: context,
@@ -384,6 +402,7 @@ mixin _$BoardViewModel on _BoardViewModel, Store {
     return '''
 boardType: ${boardType},
 tasksState: ${tasksState},
+categoriesState: ${categoriesState},
 deleteRangeState: ${deleteRangeState},
 deleteOneState: ${deleteOneState},
 updateTaskState: ${updateTaskState},

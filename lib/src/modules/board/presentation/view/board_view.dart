@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:idez_test/src/core/mixin/pending_deletion_mixin.dart';
 import 'package:idez_test/src/core/theme/app_theme.dart';
 import 'package:idez_test/src/modules/board/presentation/view_model/board_view_model.dart';
 import 'package:idez_test/src/modules/board/presentation/widgets/actions_buttons.dart';
 import 'package:idez_test/src/modules/board/presentation/widgets/board_filter.dart';
-import 'package:idez_test/src/modules/board/presentation/widgets/delete_button.dart';
+import 'package:idez_test/src/modules/shared/presentation/widgets/delete_button.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/fade_in.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/task_view_body.dart';
 import 'package:mobx/mobx.dart';
@@ -27,11 +28,28 @@ class BoardView extends StatefulWidget {
 class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
   final List<ReactionDisposer> _disposers = [];
 
+  final _scrollCtrl = ScrollController();
+
+  int _maxAnimatedIndex = -1;
+  bool _allowStagger = true;
+
+  Duration _staggerFor(int index) {
+    const window = 12;
+    if (!_allowStagger) return Duration.zero;
+    if (index <= _maxAnimatedIndex) return Duration.zero;
+    if (index > window) return Duration.zero;
+
+    _maxAnimatedIndex = index;
+
+    return Duration(milliseconds: 80 + index * 40);
+  }
+
   @override
   void initState() {
     super.initState();
     widget.viewModel.loadBoard(widget.boardType);
     widget.viewModel.loadAllData();
+
     _disposers.addAll([
       reaction((_) => widget.viewModel.tasksState, (state) {
         if (state is ErrorState) _showError(state);
@@ -67,6 +85,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
 
   @override
   void dispose() {
+    _scrollCtrl.dispose();
     for (final d in _disposers) {
       d();
     }
@@ -92,6 +111,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
                     .toSet()
                     .toList()
                   ..sort(),
+            getCategoryNameById: widget.viewModel.getCategoryNameById,
             hidePending:
                 widget.viewModel.boardType == BoardType.pending ||
                 widget.viewModel.boardType == BoardType.overdue,
@@ -208,28 +228,28 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
           padding: const EdgeInsets.all(16),
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
+          hasScrollableChild: true,
           children: [
+            const SizedBox(height: 24),
             FadeIn(
-              delay: Duration(milliseconds: 300),
+              delay: const Duration(milliseconds: 300),
               child: Observer(
-                builder: (context) {
-                  return Text(
-                    widget.viewModel.hasActiveFilters
-                        ? 'Tarefas Filtradas'
-                        : _titleForBoard(widget.viewModel.boardType),
-                    style: AppTheme.textStyles.h5,
-                  );
-                },
+                builder: (_) => Text(
+                  widget.viewModel.hasActiveFilters
+                      ? 'Tarefas Filtradas'
+                      : _titleForBoard(widget.viewModel.boardType),
+                  style: AppTheme.textStyles.h5,
+                ),
               ),
             ),
             const SizedBox(height: 24),
-            Observer(
-              builder: (context) {
-                if (widget.viewModel.tasks.isEmpty) {
-                  return FadeIn(
-                    delay: const Duration(milliseconds: 500),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 48.0),
+            Expanded(
+              child: Observer(
+                builder: (context) {
+                  final items = widget.viewModel.visibleTasks;
+                  if (items.isEmpty) {
+                    return FadeIn(
+                      delay: const Duration(milliseconds: 500),
                       child: Center(
                         child: Text(
                           'Nenhuma tarefa encontrada.\nClique no botão + para adicionar uma nova tarefa.',
@@ -239,70 +259,74 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }
+                    );
+                  }
 
-                return ListView.separated(
-                  cacheExtent: 0,
-                  shrinkWrap: true,
-                  addAutomaticKeepAlives: false,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: widget.viewModel.visibleTasks.length,
-                  separatorBuilder: (context, index) => FadeIn(
-                    delay: Duration(milliseconds: 500 + index * 100),
-                    child: Divider(color: AppTheme.colors.grey.withAlpha(70)),
-                  ),
-                  itemBuilder: (context, index) {
-                    return FadeIn(
-                      delay: Duration(milliseconds: 500 + index * 100),
-                      child: Observer(
-                        builder: (context) {
-                          final t = widget.viewModel.visibleTasks[index];
+                  return NotificationListener<UserScrollNotification>(
+                    onNotification: (n) {
+                      if (n.direction != ScrollDirection.idle) {
+                        _allowStagger = false;
+                      }
+                      return false;
+                    },
+                    child: ListView.separated(
+                      controller: _scrollCtrl,
+                      itemCount: widget.viewModel.visibleTasks.length,
+                      separatorBuilder: (_, i) => FadeIn(
+                        delay: _staggerFor(i) ~/ 2,
+                        duration: const Duration(milliseconds: 180),
+                        child: Divider(color: AppTheme.colors.grey.withAlpha(70)),
+                      ),
+                      itemBuilder: (_, i) {
+                        final t = widget.viewModel.visibleTasks[i];
+                        return FadeIn(
+                          delay: _staggerFor(i),
+                          duration: const Duration(milliseconds: 220),
+                          child: Observer(
+                            builder: (_) {
+                              final selected = widget.viewModel.selectedTasksIDs.contains(t.id);
+                              final isSelectionMode = widget.viewModel.isSelectionMode;
 
-                          final selected = widget.viewModel.selectedTasksIDs.contains(t.id);
-                          final isSelectionMode = widget.viewModel.isSelectionMode;
+                              return TaskTile(
+                                id: t.id,
+                                title: t.title,
+                                date: t.dueDate,
+                                isCompleted: t.done,
+                                category:
+                                    widget.viewModel.getCategoryNameById(t.categoryId) ?? 'nenhuma',
+                                selected: selected,
+                                isSelectionEnabled: isSelectionMode,
+                                onTap: () => widget.viewModel.toggleSelection(t.id),
+                                onLongPress: () => widget.viewModel.startSelection(t.id),
+                                onChanged: (done) => widget.viewModel.setDone(t.id, done),
+                                onEdit: () {
+                                  Navigator.of(
+                                    context,
+                                  ).pushNamed(AppRoutes.editTask, arguments: t).then((ok) {
+                                    if (ok == true) widget.viewModel.loadAllData();
+                                  });
+                                },
+                                onDelete: () {
+                                  final removed = widget.viewModel.removeByIdOptimistic(t.id);
+                                  if (removed == null) return;
 
-                          return TaskTile(
-                            id: t.id,
-                            title: t.title,
-                            date: t.dueDate,
-                            isCompleted: t.done,
-                            category: t.categoryId ?? 'nenhuma',
-                            selected: selected,
-                            isSelectionEnabled: isSelectionMode,
-                            onTap: () => widget.viewModel.toggleSelection(t.id),
-                            onLongPress: () => widget.viewModel.startSelection(t.id),
-                            onChanged: (done) => widget.viewModel.setDone(t.id, done),
-                            onEdit: () {
-                              Navigator.of(
-                                context,
-                              ).pushNamed(AppRoutes.editTask, arguments: t).then((value) {
-                                if (value == true) {
-                                  widget.viewModel.loadAllData();
-                                }
-                              });
-                            },
-
-                            onDelete: () {
-                              final removed = widget.viewModel.removeByIdOptimistic(t.id);
-                              if (removed == null) return;
-
-                              showPendingDeletion(
-                                context: context,
-                                ids: [t.id],
-                                message: 'Tarefa excluída',
-                                restore: () => widget.viewModel.restoreTasks([removed]),
-                                commit: (ids) => widget.viewModel.commitDeleteRange(ids),
+                                  showPendingDeletion(
+                                    context: context,
+                                    ids: [t.id],
+                                    message: 'Tarefa excluída',
+                                    restore: () => widget.viewModel.restoreTasks([removed]),
+                                    commit: (ids) => widget.viewModel.commitDeleteRange(ids),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),

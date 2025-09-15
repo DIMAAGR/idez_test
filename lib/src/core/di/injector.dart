@@ -1,6 +1,11 @@
 import 'package:get_it/get_it.dart';
 import 'package:idez_test/src/core/storage/wrapper.dart';
 import 'package:idez_test/src/modules/board/presentation/view_model/board_view_model.dart';
+import 'package:idez_test/src/modules/categories/domain/usecases/create_category_use_case.dart';
+import 'package:idez_test/src/modules/categories/domain/usecases/delete_category_from_id_range_use_case.dart';
+import 'package:idez_test/src/modules/categories/domain/usecases/delete_category_from_id_use_case.dart';
+import 'package:idez_test/src/modules/categories/domain/usecases/update_category_from_id_use_case.dart';
+import 'package:idez_test/src/modules/categories/presentation/view_model/categories_view_model.dart';
 import 'package:idez_test/src/modules/shared/data/data_source/task_local_data_source.dart';
 import 'package:idez_test/src/modules/shared/data/data_source/task_local_data_source_impl.dart';
 import 'package:idez_test/src/modules/shared/domain/repository/shared_repository.dart';
@@ -14,6 +19,8 @@ import 'package:idez_test/src/modules/task/data/repository/task_repository_impl.
 import 'package:idez_test/src/modules/task/domain/usecases/create_task_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../modules/categories/data/repository/categories_repository_impl.dart';
+import '../../modules/categories/domain/repository/categories_repository.dart';
 import '../../modules/home/presentation/view_model/home_view_model.dart';
 import '../../modules/shared/data/repository/shared_repository_impl.dart';
 import '../../modules/task/domain/repository/task_repository.dart';
@@ -24,11 +31,12 @@ void setupInjector() {
 
   ///
   /// INFRA
-  ///);
+  ///
   getIt.registerLazySingleton<KeyValueStore>(() => SharedPrefsStore(getIt<SharedPreferences>()));
   getIt.registerLazySingleton<TasksLocalDataSource>(() => TasksLocalDataSourceImpl(getIt()));
   getIt.registerLazySingleton<TasksRepository>(() => TaskRepositoryImpl(getIt()));
   getIt.registerLazySingleton<SharedRepository>(() => SharedRepositoryImpl(getIt()));
+  getIt.registerLazySingleton<CategoriesRepository>(() => CategoriesRepositoryImpl(getIt()));
 
   ///
   /// Home View Model
@@ -40,12 +48,21 @@ void setupInjector() {
   ///
   /// Task View Model
   ///
-  getIt.registerFactory<TaskViewModel>(() => TaskViewModel(getIt(), getIt()));
+  getIt.registerFactory<TaskViewModel>(() => TaskViewModel(getIt(), getIt(), getIt()));
 
   ///
   /// Board View Model
   ///
-  getIt.registerFactory<BoardViewModel>(() => BoardViewModel(getIt(), getIt(), getIt(), getIt()));
+  getIt.registerFactory<BoardViewModel>(
+    () => BoardViewModel(getIt(), getIt(), getIt(), getIt(), getIt()),
+  );
+
+  ///
+  /// Categories View Model
+  ///
+  getIt.registerFactory<CategoriesViewModel>(
+    () => CategoriesViewModel(getIt(), getIt(), getIt(), getIt(), getIt()),
+  );
 
   ///
   /// Use Cases
@@ -57,4 +74,15 @@ void setupInjector() {
   getIt.registerFactory<GetAllTasksUseCase>(() => GetAllTasksUseCaseImpl(getIt()));
   getIt.registerFactory<UpdateTaskFromIdUseCase>(() => UpdateTaskFromIdUseCaseImpl(getIt()));
   getIt.registerFactory<CreateTaskUseCase>(() => CreateTaskUseCaseImpl(getIt()));
+  getIt.registerFactory<CreateCategoryUseCase>(() => CreateCategoryUseCaseImpl(getIt()));
+
+  getIt.registerFactory<DeleteCategoryFromIdRangeUseCase>(
+    () => DeleteCategoryFromIdRangeUseCaseImpl(getIt()),
+  );
+  getIt.registerFactory<DeleteCategoryFromIdUseCase>(
+    () => DeleteCategoryFromIdUseCaseImpl(getIt()),
+  );
+  getIt.registerFactory<UpdateCategoryFromIdUseCase>(
+    () => UpdateCategoryFromIdUseCaseImpl(getIt()),
+  );
 }

@@ -197,11 +197,25 @@ abstract class _HomeViewModelBase with Store {
   @computed
   int get categoriesCount {
     final set = <String>{};
-    for (final t in tasks) {
-      final c = t.categoryId;
+
+    if (categoriesState is! SuccessState) return 0;
+
+    for (final t in (categoriesState as SuccessState).success) {
+      final c = t.id;
       if (c != null && c.isNotEmpty) set.add(c);
     }
     return set.length;
+  }
+
+  String? getCategoryNameById(String? id) {
+    if (id == null || id.isEmpty) return null;
+    if (categoriesState is! SuccessState) return null;
+    final list = (categoriesState as SuccessState).success;
+    final cat = list.firstWhere(
+      (c) => c.id == id,
+      orElse: () => CategoryEntity(id: id, name: id),
+    );
+    return cat.name;
   }
 
   // ----------------------------

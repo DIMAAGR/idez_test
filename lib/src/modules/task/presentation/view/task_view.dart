@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:idez_test/src/core/extensions/date_time_extension.dart';
 import 'package:idez_test/src/core/masks/text_input_date_formatter.dart';
 import 'package:idez_test/src/core/theme/app_theme.dart';
 import 'package:idez_test/src/modules/shared/domain/entities/task_entity.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/task_text_form_field.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/task_view_body.dart';
-import 'package:idez_test/src/modules/task/presentation/validators/task_validators.dart';
+import 'package:idez_test/src/core/validators/validators.dart';
 import 'package:idez_test/src/modules/task/presentation/view_model/task_view_model.dart';
 import 'package:mobx/mobx.dart';
 
@@ -39,6 +40,7 @@ class _TaskViewState extends State<TaskView> {
       widget.viewModel.title = widget.task!.title;
       widget.viewModel.date = _dateController.text;
       widget.viewModel.time = _timeController.text;
+      widget.viewModel.selectedCategoryId = widget.task!.categoryId;
     }
 
     _titleController.addListener(() {
@@ -50,6 +52,8 @@ class _TaskViewState extends State<TaskView> {
     _timeController.addListener(() {
       widget.viewModel.time = _timeController.text;
     });
+
+    widget.viewModel.loadCategories();
 
     _disposer = reaction<ViewModelState>((_) => widget.viewModel.state, (state) {
       if (state is ErrorState) {
@@ -157,6 +161,77 @@ class _TaskViewState extends State<TaskView> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 24),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Categoria (Opcional)', style: AppTheme.textStyles.button),
+          ),
+          const SizedBox(height: 4),
+          Observer(
+            builder: (_) {
+              final catState = widget.viewModel.categoriesState;
+
+              if (catState is LoadingState) {
+                return const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
+
+              if (catState is ErrorState) {
+                return Row(
+                  children: [
+                    Text(
+                      'Falha ao carregar categorias',
+                      style: AppTheme.textStyles.caption.copyWith(color: AppTheme.colors.red),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: widget.viewModel.loadCategories,
+                      child: const Text('Tentar novamente'),
+                    ),
+                  ],
+                );
+              }
+
+              final items = widget.viewModel.categories;
+
+              return DropdownButtonFormField<String?>(
+                isExpanded: true,
+                value: widget.viewModel.selectedCategoryId,
+                dropdownColor: Colors.white,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppTheme.colors.grey, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppTheme.colors.blue, width: 2),
+                  ),
+                ),
+                hint: const Text('Selecionar categoria'),
+                items: [
+                  const DropdownMenuItem<String?>(value: null, child: Text('Sem categoria')),
+                  ...items.map(
+                    (c) => DropdownMenuItem<String?>(
+                      value: c.id,
+                      child: Text(c.name.isNotEmpty == true ? c.name : c.id),
+                    ),
+                  ),
+                ],
+                onChanged: (val) => widget.viewModel.setCategory(val),
+              );
+            },
           ),
         ],
       ),

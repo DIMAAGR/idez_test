@@ -7,6 +7,8 @@ class HomeOptionsGrid extends StatelessWidget {
   final int categoriesCount;
   final int overdueTasksCount;
   final int pendingTasksCount;
+  final bool isTaskLoading;
+  final bool isCategoryLoading;
 
   final VoidCallback onTasksPressed;
   final VoidCallback onCategoriesPressed;
@@ -23,6 +25,8 @@ class HomeOptionsGrid extends StatelessWidget {
     required this.onCategoriesPressed,
     required this.onOverdueTasksPressed,
     required this.onPendingTasksPressed,
+    this.isTaskLoading = false,
+    this.isCategoryLoading = false,
   });
 
   @override
@@ -38,6 +42,7 @@ class HomeOptionsGrid extends StatelessWidget {
       ),
       children: [
         TaskOptionCard(
+          isLoading: isTaskLoading,
           onTap: onTasksPressed,
           icon: Icons.list_rounded,
           iconColor: AppTheme.colors.blue,
@@ -46,6 +51,7 @@ class HomeOptionsGrid extends StatelessWidget {
           count: tasksCount,
         ),
         TaskOptionCard(
+          isLoading: isTaskLoading,
           onTap: onPendingTasksPressed,
           icon: Icons.calendar_today_rounded,
           iconColor: AppTheme.colors.orange,
@@ -54,6 +60,7 @@ class HomeOptionsGrid extends StatelessWidget {
           count: pendingTasksCount,
         ),
         TaskOptionCard(
+          isLoading: isTaskLoading,
           onTap: onOverdueTasksPressed,
           icon: Icons.alarm,
           iconColor: AppTheme.colors.red,
@@ -62,6 +69,7 @@ class HomeOptionsGrid extends StatelessWidget {
           count: overdueTasksCount,
         ),
         TaskOptionCard(
+          isLoading: isCategoryLoading,
           onTap: onCategoriesPressed,
           icon: Icons.folder_open_rounded,
           iconColor: AppTheme.colors.grey,

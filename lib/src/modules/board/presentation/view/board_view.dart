@@ -178,7 +178,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
                             final hasSel = widget.viewModel.selectedCount > 0;
                             return DeleteButton(
                               isActivated: sel,
-                              onDelete: () => !hasSel
+                              onDelete: !hasSel
                                   ? null
                                   : () {
                                       final ids = widget.viewModel.selectedTasksIDs.toList();

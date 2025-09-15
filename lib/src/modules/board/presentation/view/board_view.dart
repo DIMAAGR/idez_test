@@ -205,7 +205,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
           ),
         ),
         body: TaskViewBody(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

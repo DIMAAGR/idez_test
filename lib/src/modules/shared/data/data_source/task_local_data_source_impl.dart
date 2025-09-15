@@ -4,7 +4,7 @@ import 'package:idez_test/src/core/schema/storage_schema.dart';
 
 import '../../../../core/storage/wrapper.dart';
 import '../models/task_model.dart';
-import '../models/category_model.dart';
+import '../../../categories/data/models/category_model.dart';
 import 'task_local_data_source.dart';
 
 class TasksLocalDataSourceImpl implements TasksLocalDataSource {

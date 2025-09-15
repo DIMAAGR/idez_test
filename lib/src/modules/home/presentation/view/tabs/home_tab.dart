@@ -6,6 +6,7 @@ import 'package:idez_test/src/modules/home/presentation/widgets/home_title.dart'
 import 'package:idez_test/src/modules/shared/presentation/widgets/fade_in.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/task_tile.dart';
 
+import '../../../../../core/state/view_model_state.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../widgets/home_options_grid.dart';
 
@@ -32,6 +33,8 @@ class HomeTab extends StatelessWidget {
                 child: Observer(
                   builder: (context) {
                     return HomeOptionsGrid(
+                      isCategoryLoading: viewModel.categoriesState is LoadingState,
+                      isTaskLoading: viewModel.tasksState is LoadingState,
                       tasksCount: viewModel.tasks.length,
                       categoriesCount: viewModel.categoriesCount,
                       overdueTasksCount: viewModel.overdueTasksCount,
@@ -39,7 +42,9 @@ class HomeTab extends StatelessWidget {
                       onTasksPressed: () => Navigator.of(context)
                           .pushNamed(AppRoutes.board, arguments: 'ALL')
                           .then((_) => viewModel.loadAllData()),
-                      onCategoriesPressed: () {},
+                      onCategoriesPressed: () => Navigator.of(
+                        context,
+                      ).pushNamed(AppRoutes.categories).then((_) => viewModel.loadAllData()),
                       onOverdueTasksPressed: () => Navigator.of(context)
                           .pushNamed(AppRoutes.board, arguments: 'OVERDUE')
                           .then((_) => viewModel.loadAllData()),
@@ -102,7 +107,7 @@ class HomeTab extends StatelessWidget {
                               title: t.title,
                               date: t.dueDate,
                               isCompleted: t.done,
-                              category: t.categoryId ?? 'nenhuma',
+                              category: viewModel.getCategoryNameById(t.categoryId) ?? 'nenhuma',
                               selected: selected,
                               isSelectionEnabled: isSelectionMode,
                               onTap: () => viewModel.toggleSelection(t.id),

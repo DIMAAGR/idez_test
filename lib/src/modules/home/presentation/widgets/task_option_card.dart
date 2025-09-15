@@ -7,6 +7,7 @@ class TaskOptionCard extends StatelessWidget {
   final String title;
   final int count;
   final Color iconColor;
+  final bool isLoading;
   final Color backgroundColor;
   const TaskOptionCard({
     super.key,
@@ -16,6 +17,7 @@ class TaskOptionCard extends StatelessWidget {
     required this.backgroundColor,
     required this.title,
     required this.count,
+    required this.isLoading,
   });
 
   @override
@@ -36,19 +38,28 @@ class TaskOptionCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Icon(icon, color: iconColor, size: 24),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '$count ',
-                  style: AppTheme.textStyles.body2Bold.copyWith(color: AppTheme.colors.black),
-                ),
-                TextSpan(
-                  text: title,
-                  style: AppTheme.textStyles.body2Regular.copyWith(color: AppTheme.colors.darkGrey),
-                ),
-              ],
-            ),
+
+          Row(
+            children: [
+              isLoading
+                  ? Container(
+                      margin: EdgeInsets.only(right: 8),
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                      ),
+                    )
+                  : Text(
+                      '$count ',
+                      style: AppTheme.textStyles.body2Bold.copyWith(color: AppTheme.colors.black),
+                    ),
+              Text(
+                title,
+                style: AppTheme.textStyles.body2Regular.copyWith(color: AppTheme.colors.darkGrey),
+              ),
+            ],
           ),
         ],
       ),

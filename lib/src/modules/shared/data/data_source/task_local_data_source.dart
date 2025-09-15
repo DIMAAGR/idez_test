@@ -1,4 +1,4 @@
-import 'package:idez_test/src/modules/shared/data/models/category_model.dart';
+import 'package:idez_test/src/modules/categories/data/models/category_model.dart';
 import 'package:idez_test/src/modules/shared/data/models/task_model.dart';
 
 abstract class TasksLocalDataSource {

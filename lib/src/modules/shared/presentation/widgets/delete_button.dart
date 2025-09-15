@@ -4,7 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 
 class DeleteButton extends StatelessWidget {
   final bool isActivated;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
   const DeleteButton({super.key, required this.isActivated, required this.onDelete});
 
   @override

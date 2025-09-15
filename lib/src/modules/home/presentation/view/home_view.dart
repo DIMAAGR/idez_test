@@ -153,9 +153,11 @@ class _HomeViewState extends State<HomeView> {
             widget.viewModel.loadAllData();
           }
         }),
-        onNewCategory: () {
-          // Navigator.pushNamed(context, AppRoutes.createCategory);
-        },
+        onNewCategory: () => Navigator.pushNamed(context, AppRoutes.createCategory).then((value) {
+          if (value == true) {
+            widget.viewModel.loadAllData();
+          }
+        }),
       ),
       bottomNavigationBar: Observer(
         builder: (_) => BottomPillNav(

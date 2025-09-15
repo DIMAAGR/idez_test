@@ -1,8 +1,11 @@
+import 'package:dartz/dartz.dart';
+import 'package:idez_test/src/modules/shared/domain/usecases/get_all_categories_use_case.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../../../core/state/view_model_state.dart';
 import '../../../shared/data/models/task_model.dart';
+import '../../../shared/domain/entities/category_entity.dart';
 import '../../../shared/domain/entities/task_entity.dart';
 import '../../../shared/domain/usecases/delete_from_id_range_use_case.dart';
 import '../../../shared/domain/usecases/delete_from_id_use_case.dart';
@@ -20,12 +23,14 @@ abstract class _BoardViewModel with Store {
   final UpdateTaskFromIdUseCase _updateTaskFromIdUseCase;
   final DeleteFromIdUseCase _deleteFromIdUseCase;
   final DeleteFromIdRangeUseCase _deleteFromIdRangeUseCase;
+  final GetAllCategoriesUseCase _getAllCategoriesUseCase;
 
   _BoardViewModel(
     this._allTasksUseCase,
     this._updateTaskFromIdUseCase,
     this._deleteFromIdUseCase,
     this._deleteFromIdRangeUseCase,
+    this._getAllCategoriesUseCase,
   );
 
   @observable
@@ -42,6 +47,9 @@ abstract class _BoardViewModel with Store {
 
   @observable
   ViewModelState<Failure, List<TaskEntity>> tasksState = InitialState();
+
+  @observable
+  ViewModelState<Failure, List<CategoryEntity>> categoriesState = InitialState();
 
   @observable
   ViewModelState<Failure, void> deleteRangeState = InitialState();
@@ -144,15 +152,32 @@ abstract class _BoardViewModel with Store {
     return out;
   }
 
+  String? getCategoryNameById(String? id) {
+    if (id == null || id.isEmpty) return null;
+    if (categoriesState is! SuccessState) return null;
+    final list = (categoriesState as SuccessState).success;
+    final cat = list.firstWhere(
+      (c) => c.id == id,
+      orElse: () => CategoryEntity(id: id, name: id),
+    );
+    return cat.name;
+  }
+
   @action
   Future<void> loadAllData() async {
+    categoriesState = LoadingState();
     tasksState = LoadingState();
 
-    final result = await _allTasksUseCase();
+    final results = await Future.wait([_allTasksUseCase(), _getAllCategoriesUseCase()]);
 
-    result.fold((l) => tasksState = ErrorState(l), (r) {
+    final tasksResult = results[0] as Either<Failure, List<TaskEntity>>;
+    final categoriesResult = results[1] as Either<Failure, List<CategoryEntity>>;
+    tasksResult.fold((l) => tasksState = ErrorState(l), (r) {
       tasks = ObservableList.of(r);
       tasksState = SuccessState(r);
+    });
+    categoriesResult.fold((l) => categoriesState = ErrorState(l), (r) {
+      categoriesState = SuccessState(r);
     });
   }
 

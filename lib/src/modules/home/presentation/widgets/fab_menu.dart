@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:idez_test/src/core/theme/app_theme.dart';
 
 class FabMenu extends StatefulWidget {
   final VoidCallback onNewTask;
@@ -71,9 +72,13 @@ class _MiniAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.surface,
-      elevation: 4,
-      borderRadius: BorderRadius.circular(20),
+      color: Colors.white,
+      elevation: 0,
+
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: AppTheme.colors.grey, width: 2),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),

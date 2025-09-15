@@ -10,6 +10,7 @@ class BoardFilter extends StatelessWidget {
   final String? selectedCategoryId;
   final Function(String?) onCategorySelected;
   final VoidCallback onClearFilters;
+  final String? Function(String) getCategoryNameById;
   final bool hidePending;
 
   const BoardFilter({
@@ -21,6 +22,7 @@ class BoardFilter extends StatelessWidget {
     required this.onCategorySelected,
     required this.onClearFilters,
     required this.hidePending,
+    required this.getCategoryNameById,
   });
 
   @override
@@ -98,16 +100,16 @@ class BoardFilter extends StatelessWidget {
             value: null,
             groupValue: selectedCategoryId,
             activeColor: colors.blue,
-            title: const Text('Todas'),
+            title: Text('Todas', style: AppTheme.textStyles.button),
             dense: true,
             onChanged: onCategorySelected,
           ),
           ...categories.map(
             (id) => RadioListTile<String?>(
               value: id,
+              activeColor: colors.blue,
               groupValue: selectedCategoryId,
-
-              title: Text(id, style: AppTheme.textStyles.caption),
+              title: Text(getCategoryNameById(id) ?? 'error', style: AppTheme.textStyles.button),
               dense: true,
               onChanged: onCategorySelected,
             ),

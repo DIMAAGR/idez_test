@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:idez_test/src/core/router/app_routes.dart';
+import 'package:idez_test/src/modules/categories/presentation/view/categories_manage_view.dart';
+import 'package:idez_test/src/modules/categories/presentation/view_model/categories_view_model.dart';
 import 'package:idez_test/src/modules/shared/domain/entities/task_entity.dart';
 import '../../modules/board/presentation/view/board_view.dart';
 import '../../modules/board/presentation/view_model/board_view_model.dart';
+import '../../modules/categories/presentation/view/categories_board_view.dart';
 import '../../modules/home/presentation/view/home_view.dart';
 import '../../modules/home/presentation/view_model/home_view_model.dart';
+import '../../modules/shared/domain/entities/category_entity.dart';
 import '../../modules/task/presentation/view/task_view.dart';
 import '../../modules/task/presentation/view_model/task_view_model.dart';
 
@@ -40,6 +44,20 @@ Route<dynamic>? buildOnGenerateRoute(RouteSettings settings) {
     case AppRoutes.board:
       return _slideUpRoute(
         BoardView(viewModel: getIt<BoardViewModel>(), boardType: settings.arguments as String?),
+      );
+    case AppRoutes.categories:
+      return _slideUpRoute(CategoriesBoardView(viewModel: getIt<CategoriesViewModel>()));
+    case AppRoutes.createCategory:
+      return _slideUpRoute(
+        CategoriesManageView(viewModel: getIt<CategoriesViewModel>(), isCreate: true),
+      );
+    case AppRoutes.editCategory:
+      return _slideUpRoute(
+        CategoriesManageView(
+          viewModel: getIt<CategoriesViewModel>(),
+          isCreate: false,
+          category: settings.arguments as CategoryEntity?,
+        ),
       );
     case AppRoutes.createTask:
       return _slideUpRoute(TaskView(viewModel: getIt<TaskViewModel>(), isCreate: true));

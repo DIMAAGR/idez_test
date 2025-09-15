@@ -17,6 +17,24 @@ class TaskModel {
     this.categoryId,
   });
 
+  TaskModel copyWith({
+    String? id,
+    String? title,
+    bool? done,
+    String? createdAt,
+    String? dueDate,
+    String? categoryId,
+  }) {
+    return TaskModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      done: done ?? this.done,
+      createdAt: createdAt ?? this.createdAt,
+      dueDate: dueDate ?? this.dueDate,
+      categoryId: categoryId ?? this.categoryId,
+    );
+  }
+
   factory TaskModel.fromEntity(TaskEntity entity) {
     return TaskModel(
       id: entity.id,

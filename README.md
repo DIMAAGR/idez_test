@@ -37,12 +37,27 @@ src/
 
 ---
 
+---
+
+## 🧭 E por que essa arquitetura?
+
+Eu já vi muita empresa organizando microapps com dependência cruzada e várias gambiarras só pra “separar”. Eu não quis seguir esse modelo.  
+Pra mim:
+
+- **Core ≠ dependência obrigatória das features** → prefiro que seja infra e utilitário, não algo que quebre se eu exportar uma feature.
+- **Reuso > isolamento extremo** → `TaskEntity`, `CategoryEntity` e `SharedRepository` vivem em `shared/` porque são úteis em várias telas. Não faz sentido duplicar só pra seguir microapp “bonitinho”.
+- **Escalabilidade de verdade** → a arquitetura atual já é suficiente pra suportar **um app grande** sem travar ou virar um monolito confuso.
+
+---
+
 ## ⚡ Otimizações implementadas
 
 - **Exclusão otimista com Undo**: a tarefa é removida da lista imediatamente, mas pode ser restaurada se o usuário desfizer a ação.  
 - **Observers granulares**: apenas o item da lista que mudou é rebuildado, reduzindo custo de renderização em listas grandes.  
 - **Mixin para exclusões pendentes**: centraliza a lógica de undo/commit, evitando repetição de código.  
 - **Arquitetura limpa e modular**: separação clara entre `domain`, `data` e `presentation`.
+- **Lista performática** → uso de `ListView.separated` com lazy build.
+- **Validações & máscaras** → inputs de data/hora padronizados e validados.
 
 ---
 
@@ -214,12 +229,25 @@ Criei um `FadeIn` customizado em vez de usar transições globais, permitindo co
 
 ## ✅ Conclusão
 
-O projeto foi desenhado para ser:  
-- Simples, mas **extensível**  
-- Reativo e otimizado para **listas grandes**  
-- Fácil de **testar** e **expandir** no futuro  
+Esse app não é só “mais um todo list”.  
+Eu quis construir algo pequeno mas **pensado como base de projeto grande**:  
+- arquitetura clara,  
+- regras de negócio isoladas,  
+- UI modular,  
+- reuso de domain/data,  
+- performance em listas grandes,  
+- undo otimista,  
+- e um caminho óbvio pra evoluir com SQL, sync remoto e segurança.  
 
-Mais do que uma lista de tarefas, este projeto é um **exercício de arquitetura** que demonstra como preparar uma aplicação para crescer sem comprometer legibilidade ou performance.
+Pra mim, esse setup já mostra que é possível começar simples mas sem comprometer o futuro do projeto, mais do que uma lista de tarefas, este projeto é um **exercício de arquitetura** que demonstra como preparar uma aplicação para crescer com legibilidade ou performance.
+
+---
+
+## 🛠️ Como rodar
+
+1. Clone o repositório  
+2. Rode `flutter pub get`  
+3. Inicie com `flutter run`  
 
 ---
 

@@ -252,7 +252,7 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
                               showPendingDeletion(
                                 context: context,
                                 ids: [t.id],
-                                message: 'Tarefa excluída',
+                                message: 'Categoria excluída',
                                 restore: () => widget.viewModel.restoreCategories([removed]),
                                 commit: (ids) => widget.viewModel.commitDeleteRange(ids),
                               );

@@ -6,6 +6,7 @@ import 'package:idez_test/src/modules/categories/domain/usecases/delete_category
 import 'package:idez_test/src/modules/categories/domain/usecases/delete_category_from_id_use_case.dart';
 import 'package:idez_test/src/modules/categories/domain/usecases/update_category_from_id_use_case.dart';
 import 'package:idez_test/src/modules/categories/presentation/view_model/categories_view_model.dart';
+import 'package:idez_test/src/modules/settings/presentation/view_model/settings_view_model.dart';
 import 'package:idez_test/src/modules/shared/data/data_source/task_local_data_source.dart';
 import 'package:idez_test/src/modules/shared/data/data_source/task_local_data_source_impl.dart';
 import 'package:idez_test/src/modules/shared/domain/repository/shared_repository.dart';
@@ -63,6 +64,11 @@ void setupInjector() {
   getIt.registerFactory<CategoriesViewModel>(
     () => CategoriesViewModel(getIt(), getIt(), getIt(), getIt(), getIt()),
   );
+
+  ///
+  /// Categories View Model
+  ///
+  getIt.registerFactory<SettingsViewModel>(() => SettingsViewModel());
 
   ///
   /// Use Cases

@@ -17,10 +17,10 @@ class HomeTitle extends StatelessWidget {
             Text('Visualize as suas tarefas de hoje', style: AppTheme.textStyles.body1Regular),
           ],
         ),
-        // IconButton(
-        //   onPressed: onSettingsPressed,
-        //   icon: Icon(Icons.settings_outlined, color: AppTheme.colors.black),
-        // ),
+        IconButton(
+          onPressed: onSettingsPressed,
+          icon: Icon(Icons.settings_outlined, color: AppTheme.colors.black),
+        ),
       ],
     );
   }

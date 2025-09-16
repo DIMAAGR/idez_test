@@ -37,8 +37,6 @@ src/
 
 ---
 
----
-
 ## 🧭 E por que essa arquitetura?
 
 Eu já vi muita empresa organizando microapps com dependência cruzada e várias gambiarras só pra “separar”. Eu não quis seguir esse modelo.  

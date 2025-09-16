@@ -40,6 +40,12 @@ class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
     if (ok == true && mounted) viewModel.loadAllData();
   }
 
+  Future<void> _goToSettings() async {
+    await commitPendingIfAny(viewModel.commitDeleteRange);
+    final ok = await Navigator.of(context).pushNamed(AppRoutes.settings);
+    if (ok == true && mounted) viewModel.loadAllData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -53,9 +59,7 @@ class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
                 delay: const Duration(milliseconds: 200),
                 child: HomeTitle(
                   onSettingsPressed: () async {
-                    // Exemplo: se um botão abrir settings no futuro, confirme antes
-                    await commitPendingIfAny(viewModel.commitDeleteRange);
-                    // Navigator.pushNamed(context, AppRoutes.settings);
+                    await _goToSettings();
                   },
                 ),
               ),

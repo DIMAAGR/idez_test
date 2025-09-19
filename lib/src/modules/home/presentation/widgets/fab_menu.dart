@@ -51,6 +51,7 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
                 ),
         ),
         FloatingActionButton(
+          backgroundColor: AppTheme.of(context).colors.blue,
           shape: CircleBorder(),
           heroTag: 'fab-main',
           elevation: 0,
@@ -72,12 +73,10 @@ class _MiniAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
       elevation: 0,
-
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: AppTheme.colors.grey, width: 2),
+        side: BorderSide(color: AppTheme.of(context).colors.grey, width: 2),
       ),
       child: InkWell(
         onTap: onTap,

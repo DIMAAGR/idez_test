@@ -2,4 +2,5 @@ class StorageSchema {
   static const version = 1;
   static const tasksKey = 'tasks_v$version';
   static const categoriesKey = 'categories_v$version';
+  static const settingsKey = 'settings_v$version';
 }

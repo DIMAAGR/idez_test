@@ -107,8 +107,20 @@ mixin _$TaskViewModel on _TaskViewModelBase, Store {
   );
 
   @override
-  Future<void> editTask(String id) {
-    return _$editTaskAsyncAction.run(() => super.editTask(id));
+  Future<void> editTask({
+    required String id,
+    required DateTime originalCreatedAt,
+    bool preserveDone = true,
+    bool originalDoneValue = false,
+  }) {
+    return _$editTaskAsyncAction.run(
+      () => super.editTask(
+        id: id,
+        originalCreatedAt: originalCreatedAt,
+        preserveDone: preserveDone,
+        originalDoneValue: originalDoneValue,
+      ),
+    );
   }
 
   late final _$_TaskViewModelBaseActionController = ActionController(

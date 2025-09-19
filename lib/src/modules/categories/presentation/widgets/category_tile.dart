@@ -29,13 +29,16 @@ class CategoryTile extends StatelessWidget {
     return ListTile(
       selected: selected,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      selectedTileColor: AppTheme.colors.lightBlue,
-      tileColor: Colors.white,
+      selectedTileColor: AppTheme.of(context).colors.lightBlue,
       contentPadding: EdgeInsets.zero,
       horizontalTitleGap: 0,
       onTap: isSelectionEnabled ? onTap : null,
       onLongPress: onLongPress,
-      title: Text(title, style: AppTheme.textStyles.body2Regular, overflow: TextOverflow.clip),
+      title: Text(
+        title,
+        style: AppTheme.of(context).textStyles.body2Regular,
+        overflow: TextOverflow.clip,
+      ),
       trailing: PopupMenuButton<String>(
         onSelected: (value) {
           if (value == 'edit') {
@@ -53,11 +56,13 @@ class CategoryTile extends StatelessWidget {
             value: 'delete',
             child: Row(
               children: [
-                Icon(Icons.delete, size: 18, color: AppTheme.colors.red),
+                Icon(Icons.delete, size: 18, color: AppTheme.of(context).colors.red),
                 SizedBox(width: 8),
                 Text(
                   'Deletar',
-                  style: AppTheme.textStyles.body2Regular.copyWith(color: AppTheme.colors.red),
+                  style: AppTheme.of(
+                    context,
+                  ).textStyles.body2Regular.copyWith(color: AppTheme.of(context).colors.red),
                 ),
               ],
             ),

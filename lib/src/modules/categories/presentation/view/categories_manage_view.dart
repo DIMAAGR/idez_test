@@ -48,9 +48,9 @@ class _CategoriesManageViewState extends State<CategoriesManageView> {
           SnackBar(
             content: Text(
               failure.message ?? 'Erro inesperado',
-              style: AppTheme.textStyles.body2Regular.copyWith(color: Colors.white),
+              style: AppTheme.of(context).textStyles.body2Regular.copyWith(color: Colors.white),
             ),
-            backgroundColor: AppTheme.colors.red,
+            backgroundColor: AppTheme.of(context).colors.red,
           ),
         );
       } else if (state is SuccessState) {
@@ -58,9 +58,9 @@ class _CategoriesManageViewState extends State<CategoriesManageView> {
           SnackBar(
             content: Text(
               'Categoria salva com sucesso!',
-              style: AppTheme.textStyles.body2Regular.copyWith(color: Colors.white),
+              style: AppTheme.of(context).textStyles.body2Regular.copyWith(color: Colors.white),
             ),
-            backgroundColor: AppTheme.colors.green,
+            backgroundColor: AppTheme.of(context).colors.green,
           ),
         );
         Navigator.of(context).pop(true);
@@ -83,14 +83,14 @@ class _CategoriesManageViewState extends State<CategoriesManageView> {
       appBar: AppBar(
         title: Text(
           widget.isCreate ? 'Nova Categoria' : 'Editar Categoria',
-          style: AppTheme.textStyles.body1Regular,
+          style: AppTheme.of(context).textStyles.body1Regular,
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: AppTheme.colors.blue,
+                foregroundColor: AppTheme.of(context).colors.blue,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               onPressed: () {
@@ -114,7 +114,7 @@ class _CategoriesManageViewState extends State<CategoriesManageView> {
         children: [
           Text(
             widget.isCreate ? 'Criar uma nova categoria' : 'Editar categoria',
-            style: AppTheme.textStyles.h5,
+            style: AppTheme.of(context).textStyles.h5,
           ),
           SizedBox(height: 16),
           Form(

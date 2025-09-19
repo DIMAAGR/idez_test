@@ -10,6 +10,7 @@ import 'package:idez_test/src/modules/home/presentation/view/tabs/done_tab.dart'
 import 'package:idez_test/src/modules/home/presentation/widgets/fab_menu.dart';
 import 'package:idez_test/src/modules/home/presentation/widgets/bottom_pill_nav.dart';
 
+import '../../../../core/mixin/pending_deletion_mixin.dart';
 import '../../../../core/state/view_model_state.dart';
 import '../models/pill_tab_enum.dart';
 import '../view_model/home_view_model.dart';
@@ -22,7 +23,7 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends State<HomeView> with PendingDeletionMixin {
   final List<ReactionDisposer> _disposers = [];
 
   @override
@@ -44,30 +45,15 @@ class _HomeViewState extends State<HomeView> {
       reaction((_) => widget.viewModel.updateTaskState, (state) {
         if (state is ErrorState) _showError(state);
       }),
-
-      reaction((_) => widget.viewModel.deleteRangeState, (state) {
-        if (state is ErrorState) {
-          _showError(state);
-        } else if (state is SuccessState) {
-          _showInfo('Exclusão concluída');
-        }
-      }),
     ]);
   }
 
   void _showError(Object error) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
     final msg = error.toString();
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: colors.red));
-  }
-
-  void _showInfo(String msg) {
-    final colors = AppTheme.colors;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: colors.darkGrey));
   }
 
   @override
@@ -78,9 +64,27 @@ class _HomeViewState extends State<HomeView> {
     super.dispose();
   }
 
+  Future<void> _beforeNavigate() async {
+    await commitPendingIfAny(widget.viewModel.commitDeleteRange);
+  }
+
+  void _requestDelete({
+    required List<String> ids,
+    required String message,
+    required VoidCallback restore,
+  }) {
+    showPendingDeletion(
+      context: context,
+      ids: ids,
+      message: message,
+      restore: restore,
+      commit: widget.viewModel.commitDeleteRange,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
 
     return Scaffold(
       appBar: PreferredSize(
@@ -101,7 +105,7 @@ class _HomeViewState extends State<HomeView> {
                       titleSpacing: 0,
                       title: Text(
                         '${widget.viewModel.selectedCount} selecionada(s)',
-                        style: AppTheme.textStyles.body1Regular,
+                        style: AppTheme.of(context).textStyles.body1Regular,
                       ),
                       actions: [
                         IconButton(
@@ -113,26 +117,13 @@ class _HomeViewState extends State<HomeView> {
                                   final ids = widget.viewModel.selectedTasksIDs.toList();
                                   final removed = widget.viewModel.removeByIdsOptimistic(ids);
 
-                                  bool undone = false;
-                                  final bar = ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('${removed.length} tarefa(s) excluída(s)'),
-                                      action: SnackBarAction(
-                                        label: 'Desfazer',
-                                        onPressed: () {
-                                          undone = true;
-                                          widget.viewModel.restoreTasks(removed);
-                                        },
-                                      ),
-                                      duration: const Duration(seconds: 4),
-                                    ),
+                                  showPendingDeletion(
+                                    context: context,
+                                    ids: ids,
+                                    message: '${removed.length} tarefa(s) excluída(s)',
+                                    restore: () => widget.viewModel.restoreTasks(removed),
+                                    commit: widget.viewModel.commitDeleteRange,
                                   );
-
-                                  bar.closed.then((_) {
-                                    if (!undone) {
-                                      widget.viewModel.commitDeleteRange(ids);
-                                    }
-                                  });
                                 },
                         ),
                       ],
@@ -144,11 +135,19 @@ class _HomeViewState extends State<HomeView> {
       ),
       body: Observer(
         builder: (_) => widget.viewModel.currentTab == PillTab.home
-            ? HomeTab(viewModel: widget.viewModel)
-            : DoneTab(viewModel: widget.viewModel),
+            ? HomeTab(
+                viewModel: widget.viewModel,
+                onBeforeNavigate: _beforeNavigate,
+                onDeleteRequest: _requestDelete,
+              )
+            : DoneTab(
+                viewModel: widget.viewModel,
+                onBeforeNavigate: _beforeNavigate,
+                onDeleteRequest: _requestDelete,
+              ),
       ),
       floatingActionButton: FabMenu(
-        onNewTask: () => Navigator.pushNamed(context, AppRoutes.createTask).then((value) {
+        onNewTask: () => Navigator.pushNamed(context, AppRoutes.createTask).then((value) async {
           if (value == true) {
             widget.viewModel.loadAllData();
           }

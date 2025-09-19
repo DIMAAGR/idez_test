@@ -1,6 +1,7 @@
 class ViewModelState<E, S> {
   final S? _success;
   final E? _error;
+
   ViewModelState(this._success, this._error);
 }
 

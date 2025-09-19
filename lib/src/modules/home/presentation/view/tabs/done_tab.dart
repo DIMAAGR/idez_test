@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:idez_test/src/core/mixin/pending_deletion_mixin.dart';
 import 'package:idez_test/src/core/router/app_routes.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/fade_in.dart';
 import 'package:idez_test/src/modules/shared/presentation/widgets/task_tile.dart';
@@ -10,17 +9,29 @@ import '../../view_model/home_view_model.dart';
 
 class DoneTab extends StatefulWidget {
   final HomeViewModel viewModel;
-  const DoneTab({super.key, required this.viewModel});
+  final Future<void> Function() onBeforeNavigate;
+  final void Function({
+    required List<String> ids,
+    required String message,
+    required VoidCallback restore,
+  })
+  onDeleteRequest;
+  const DoneTab({
+    super.key,
+    required this.viewModel,
+    required this.onBeforeNavigate,
+    required this.onDeleteRequest,
+  });
 
   @override
   State<DoneTab> createState() => _DoneTabState();
 }
 
-class _DoneTabState extends State<DoneTab> with PendingDeletionMixin {
+class _DoneTabState extends State<DoneTab> {
   HomeViewModel get vm => widget.viewModel;
 
   Future<void> _goToEditTask(dynamic t) async {
-    await commitPendingIfAny(vm.commitDeleteRange);
+    await widget.onBeforeNavigate();
     final ok = await Navigator.of(context).pushNamed(AppRoutes.editTask, arguments: t);
     if (ok == true && mounted) vm.loadAllData();
   }
@@ -36,7 +47,7 @@ class _DoneTabState extends State<DoneTab> with PendingDeletionMixin {
             const SizedBox(height: 24),
             FadeIn(
               delay: const Duration(milliseconds: 200),
-              child: Text('Tarefas Concluídas', style: AppTheme.textStyles.h5),
+              child: Text('Tarefas Concluídas', style: AppTheme.of(context).textStyles.h5),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -50,8 +61,8 @@ class _DoneTabState extends State<DoneTab> with PendingDeletionMixin {
                       child: Center(
                         child: Text(
                           'Nenhuma tarefa concluída ainda.',
-                          style: AppTheme.textStyles.body1Regular.copyWith(
-                            color: AppTheme.colors.darkGrey,
+                          style: AppTheme.of(context).textStyles.body1Regular.copyWith(
+                            color: AppTheme.of(context).colors.darkGrey,
                           ),
                         ),
                       ),
@@ -64,7 +75,7 @@ class _DoneTabState extends State<DoneTab> with PendingDeletionMixin {
                     separatorBuilder: (context, index) => FadeIn(
                       delay: Duration(milliseconds: 220 + index * 60),
                       duration: const Duration(milliseconds: 240),
-                      child: Divider(color: AppTheme.colors.grey.withAlpha(70)),
+                      child: Divider(color: AppTheme.of(context).colors.grey.withAlpha(70)),
                     ),
                     itemBuilder: (context, index) {
                       final t = done[index];
@@ -92,16 +103,13 @@ class _DoneTabState extends State<DoneTab> with PendingDeletionMixin {
                               onEdit: () => _goToEditTask(t),
 
                               onDelete: () {
-                                // Remoção otimista + snackbar com desfazer
-                                final removed = vm.removeByIdOptimistic(t.id);
+                                final removed = widget.viewModel.removeByIdOptimistic(t.id);
                                 if (removed == null) return;
 
-                                showPendingDeletion(
-                                  context: context,
+                                widget.onDeleteRequest(
                                   ids: [t.id],
                                   message: 'Tarefa excluída',
-                                  restore: () => vm.restoreTasks([removed]),
-                                  commit: (ids) => vm.commitDeleteRange(ids),
+                                  restore: () => widget.viewModel.restoreTasks([removed]),
                                 );
                               },
                             );

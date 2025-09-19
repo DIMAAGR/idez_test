@@ -32,7 +32,7 @@ class ActionsButtons extends StatelessWidget {
                 icon: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Icon(Icons.filter_alt_rounded, color: AppTheme.colors.darkGrey),
+                    Icon(Icons.filter_alt_rounded, color: AppTheme.of(context).colors.darkGrey),
                     if (hasActiveFilters)
                       Positioned(
                         right: 0,
@@ -41,7 +41,7 @@ class ActionsButtons extends StatelessWidget {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: AppTheme.colors.blue,
+                            color: AppTheme.of(context).colors.blue,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -52,7 +52,7 @@ class ActionsButtons extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Adicionar tarefa',
-                icon: Icon(Icons.add_rounded, color: AppTheme.colors.darkGrey),
+                icon: Icon(Icons.add_rounded, color: AppTheme.of(context).colors.darkGrey),
                 onPressed: onAddTaskPressed,
               ),
             ],

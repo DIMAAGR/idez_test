@@ -43,7 +43,7 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
   }
 
   void _showError(Object error) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
     final msg = error.toString();
     ScaffoldMessenger.of(
       context,
@@ -51,7 +51,7 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
   }
 
   void _showInfo(String msg) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: colors.darkGrey));
@@ -67,7 +67,7 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
 
     return PopScope(
       onPopInvokedWithResult: (result, _) async {
@@ -80,7 +80,6 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
             builder: (_) {
               final sel = widget.viewModel.isSelectionMode;
               return AppBar(
-                backgroundColor: Colors.white,
                 elevation: 0,
                 leading: SizedBox(
                   width: kToolbarHeight,
@@ -130,7 +129,10 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
                             opacity: !sel ? 1 : 0,
                             child: IconButton(
                               tooltip: 'Adicionar tarefa',
-                              icon: Icon(Icons.add_rounded, color: AppTheme.colors.darkGrey),
+                              icon: Icon(
+                                Icons.add_rounded,
+                                color: AppTheme.of(context).colors.darkGrey,
+                              ),
                               onPressed: () async {
                                 final ok = await Navigator.pushNamed(
                                   context,
@@ -182,7 +184,7 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
               delay: Duration(milliseconds: 300),
               child: Observer(
                 builder: (context) {
-                  return Text('Minhas Categorias', style: AppTheme.textStyles.h5);
+                  return Text('Minhas Categorias', style: AppTheme.of(context).textStyles.h5);
                 },
               ),
             ),
@@ -198,8 +200,8 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
                         child: Text(
                           'Nenhuma categoria encontrada.\nClique no botão + para adicionar uma nova categoria.',
                           textAlign: TextAlign.center,
-                          style: AppTheme.textStyles.body1Regular.copyWith(
-                            color: AppTheme.colors.grey,
+                          style: AppTheme.of(context).textStyles.body1Regular.copyWith(
+                            color: AppTheme.of(context).colors.grey,
                           ),
                         ),
                       ),
@@ -215,7 +217,7 @@ class _CategoriesBoardViewState extends State<CategoriesBoardView> with PendingD
                   itemCount: widget.viewModel.categories.length,
                   separatorBuilder: (context, index) => FadeIn(
                     delay: Duration(milliseconds: 500 + index * 100),
-                    child: Divider(color: AppTheme.colors.grey.withAlpha(70)),
+                    child: Divider(color: AppTheme.of(context).colors.grey.withAlpha(70)),
                   ),
                   itemBuilder: (context, index) {
                     return FadeIn(

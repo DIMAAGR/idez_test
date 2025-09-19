@@ -9,6 +9,8 @@ import '../../modules/board/presentation/view_model/board_view_model.dart';
 import '../../modules/categories/presentation/view/categories_board_view.dart';
 import '../../modules/home/presentation/view/home_view.dart';
 import '../../modules/home/presentation/view_model/home_view_model.dart';
+import '../../modules/settings/presentation/view/settings_view.dart';
+import '../../modules/settings/presentation/view_model/settings_view_model.dart';
 import '../../modules/shared/domain/entities/category_entity.dart';
 import '../../modules/task/presentation/view/task_view.dart';
 import '../../modules/task/presentation/view_model/task_view_model.dart';
@@ -45,6 +47,8 @@ Route<dynamic>? buildOnGenerateRoute(RouteSettings settings) {
       return _slideUpRoute(
         BoardView(viewModel: getIt<BoardViewModel>(), boardType: settings.arguments as String?),
       );
+    case AppRoutes.settings:
+      return _slideUpRoute(SettingsView(viewModel: getIt<SettingsViewModel>()));
     case AppRoutes.categories:
       return _slideUpRoute(CategoriesBoardView(viewModel: getIt<CategoriesViewModel>()));
     case AppRoutes.createCategory:

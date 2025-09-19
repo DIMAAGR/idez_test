@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:idez_test/src/core/mixin/pending_deletion_mixin.dart';
 import 'package:idez_test/src/core/router/app_routes.dart';
 import 'package:idez_test/src/modules/home/presentation/view_model/home_view_model.dart';
 import 'package:idez_test/src/modules/home/presentation/widgets/home_title.dart';
@@ -13,31 +12,49 @@ import '../../widgets/home_options_grid.dart';
 
 class HomeTab extends StatefulWidget {
   final HomeViewModel viewModel;
-  const HomeTab({super.key, required this.viewModel});
+  final Future<void> Function() onBeforeNavigate;
+  final void Function({
+    required List<String> ids,
+    required String message,
+    required VoidCallback restore,
+  })
+  onDeleteRequest;
+  const HomeTab({
+    super.key,
+    required this.viewModel,
+    required this.onBeforeNavigate,
+    required this.onDeleteRequest,
+  });
 
   @override
   State<HomeTab> createState() => _HomeTabState();
 }
 
-class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
+class _HomeTabState extends State<HomeTab> {
   HomeViewModel get viewModel => widget.viewModel;
 
   Future<void> _goToBoard(String arg) async {
-    await commitPendingIfAny(viewModel.commitDeleteRange);
+    await widget.onBeforeNavigate();
     await Navigator.of(context).pushNamed(AppRoutes.board, arguments: arg);
     if (mounted) viewModel.loadAllData();
   }
 
   Future<void> _goToCategories() async {
-    await commitPendingIfAny(viewModel.commitDeleteRange);
+    await widget.onBeforeNavigate();
     await Navigator.of(context).pushNamed(AppRoutes.categories);
     if (mounted) viewModel.loadAllData();
   }
 
   Future<void> _goToEditTask(dynamic t) async {
-    await commitPendingIfAny(viewModel.commitDeleteRange);
+    await widget.onBeforeNavigate();
     final ok = await Navigator.of(context).pushNamed(AppRoutes.editTask, arguments: t);
-    if (ok == true && mounted) viewModel.loadAllData();
+    if (ok == true) viewModel.loadAllData();
+  }
+
+  Future<void> _goToSettings() async {
+    await widget.onBeforeNavigate();
+    final ok = await Navigator.of(context).pushNamed(AppRoutes.settings);
+    if (ok == true) viewModel.loadAllData();
   }
 
   @override
@@ -53,9 +70,7 @@ class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
                 delay: const Duration(milliseconds: 200),
                 child: HomeTitle(
                   onSettingsPressed: () async {
-                    // Exemplo: se um botão abrir settings no futuro, confirme antes
-                    await commitPendingIfAny(viewModel.commitDeleteRange);
-                    // Navigator.pushNamed(context, AppRoutes.settings);
+                    await _goToSettings();
                   },
                 ),
               ),
@@ -82,7 +97,7 @@ class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
               const SizedBox(height: 32),
               FadeIn(
                 delay: const Duration(milliseconds: 400),
-                child: Text('Recentes', style: AppTheme.textStyles.body1Bold),
+                child: Text('Recentes', style: AppTheme.of(context).textStyles.body1Bold),
               ),
               const SizedBox(height: 16),
 
@@ -97,8 +112,8 @@ class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
                           child: Text(
                             'Nenhuma tarefa encontrada.\nClique no botão + para adicionar uma nova tarefa.',
                             textAlign: TextAlign.center,
-                            style: AppTheme.textStyles.body1Regular.copyWith(
-                              color: AppTheme.colors.grey,
+                            style: AppTheme.of(context).textStyles.body1Regular.copyWith(
+                              color: AppTheme.of(context).colors.grey,
                             ),
                           ),
                         ),
@@ -111,10 +126,10 @@ class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
                     shrinkWrap: true,
                     addAutomaticKeepAlives: false,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: viewModel.lastTasks.length,
+                    itemCount: viewModel.recentListSize,
                     separatorBuilder: (context, index) => FadeIn(
                       delay: Duration(milliseconds: 500 + index * 100),
-                      child: Divider(color: AppTheme.colors.grey.withAlpha(70)),
+                      child: Divider(color: AppTheme.of(context).colors.grey.withAlpha(70)),
                     ),
                     itemBuilder: (context, index) {
                       return FadeIn(
@@ -141,15 +156,13 @@ class _HomeTabState extends State<HomeTab> with PendingDeletionMixin {
                               onEdit: () => _goToEditTask(t),
 
                               onDelete: () {
-                                final removed = viewModel.removeByIdOptimistic(t.id);
+                                final removed = widget.viewModel.removeByIdOptimistic(t.id);
                                 if (removed == null) return;
 
-                                showPendingDeletion(
-                                  context: context,
+                                widget.onDeleteRequest(
                                   ids: [t.id],
                                   message: 'Tarefa excluída',
-                                  restore: () => viewModel.restoreTasks([removed]),
-                                  commit: (ids) => viewModel.commitDeleteRange(ids),
+                                  restore: () => widget.viewModel.restoreTasks([removed]),
                                 );
                               },
                             );

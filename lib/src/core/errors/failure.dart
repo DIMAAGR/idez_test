@@ -27,3 +27,7 @@ final class StorageFailure extends Failure {
 final class NetworkFailure extends Failure {
   const NetworkFailure(super.m, {super.cause, super.stackTrace});
 }
+
+final class NotificationFailure extends Failure {
+  const NotificationFailure(super.m, {super.cause, super.stackTrace});
+}

@@ -27,7 +27,7 @@ class BoardFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
 
     final labels = {
       TaskFilter.all: 'Todas',
@@ -59,10 +59,10 @@ class BoardFilter extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text('Filtros', style: AppTheme.textStyles.h6),
+          Text('Filtros', style: AppTheme.of(context).textStyles.h6),
           const SizedBox(height: 12),
 
-          Text('Status', style: AppTheme.textStyles.body1Bold),
+          Text('Status', style: AppTheme.of(context).textStyles.body1Bold),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -82,7 +82,7 @@ class BoardFilter extends StatelessWidget {
                     backgroundColor: Colors.white,
                     label: Text(
                       labels[f]!,
-                      style: AppTheme.textStyles.body2Regular.copyWith(
+                      style: AppTheme.of(context).textStyles.body2Regular.copyWith(
                         color: selected ? colors.blue : colors.black,
                       ),
                     ),
@@ -94,13 +94,13 @@ class BoardFilter extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-          Text('Categoria', style: AppTheme.textStyles.body1Bold),
+          Text('Categoria', style: AppTheme.of(context).textStyles.body1Bold),
 
           RadioListTile<String?>(
             value: null,
             groupValue: selectedCategoryId,
             activeColor: colors.blue,
-            title: Text('Todas', style: AppTheme.textStyles.button),
+            title: Text('Todas', style: AppTheme.of(context).textStyles.button),
             dense: true,
             onChanged: onCategorySelected,
           ),
@@ -109,7 +109,10 @@ class BoardFilter extends StatelessWidget {
               value: id,
               activeColor: colors.blue,
               groupValue: selectedCategoryId,
-              title: Text(getCategoryNameById(id) ?? 'error', style: AppTheme.textStyles.button),
+              title: Text(
+                getCategoryNameById(id) ?? 'error',
+                style: AppTheme.of(context).textStyles.button,
+              ),
               dense: true,
               onChanged: onCategorySelected,
             ),
@@ -120,14 +123,14 @@ class BoardFilter extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: onClearFilters,
-                child: Text('Limpar', style: AppTheme.textStyles.body2Regular),
+                child: Text('Limpar', style: AppTheme.of(context).textStyles.body2Regular),
               ),
               const Spacer(),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   'Aplicar',
-                  style: AppTheme.textStyles.body2Regular.copyWith(color: colors.blue),
+                  style: AppTheme.of(context).textStyles.body2Regular.copyWith(color: colors.blue),
                 ),
               ),
             ],

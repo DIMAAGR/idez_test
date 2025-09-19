@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 extension DateTimeExtension on DateTime {
   String formatRelative() {
@@ -48,5 +49,9 @@ extension DateTimeExtension on DateTime {
   bool get isOlderThanNow {
     final now = DateTime.now();
     return isBefore(now);
+  }
+
+  tz.TZDateTime toTZDateTime() {
+    return tz.TZDateTime.from(this, tz.local);
   }
 }

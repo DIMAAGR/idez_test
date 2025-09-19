@@ -1,10 +1,9 @@
-import 'package:idez_test/src/modules/shared/domain/usecases/update_task_from_id_use_case.dart';
+import 'package:idez_test/src/core/services/settings/settings_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../../../core/state/view_model_state.dart';
-import '../../../shared/data/models/task_model.dart';
 import '../../../shared/domain/entities/task_entity.dart';
 import '../../../shared/domain/entities/category_entity.dart';
 
@@ -15,6 +14,7 @@ import '../../../shared/domain/usecases/get_all_categories_use_case.dart';
 import '../../../shared/domain/usecases/delete_from_id_use_case.dart';
 import '../../../shared/domain/usecases/delete_from_id_range_use_case.dart';
 
+import '../../../shared/domain/usecases/update_task_from_id_use_case.dart';
 import '../models/pill_tab_enum.dart';
 
 part 'home_view_model.g.dart';
@@ -28,6 +28,7 @@ abstract class _HomeViewModelBase with Store {
   final DeleteFromIdUseCase _deleteFromIdUseCase;
   final DeleteFromIdRangeUseCase _deleteFromIdRangeUseCase;
   final UpdateTaskFromIdUseCase _updateTaskFromIdUseCase;
+  final SettingsService _settingsService;
 
   _HomeViewModelBase(
     this._allCategoriesUseCase,
@@ -36,6 +37,7 @@ abstract class _HomeViewModelBase with Store {
     this._deleteFromIdUseCase,
     this._deleteFromIdRangeUseCase,
     this._updateTaskFromIdUseCase,
+    this._settingsService,
   );
 
   // ----------------------------
@@ -73,7 +75,7 @@ abstract class _HomeViewModelBase with Store {
   @computed
   List<TaskEntity> get lastTasks {
     final sorted = [...tasks]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return sorted.take(10).toList(growable: false);
+    return sorted.take(_settingsService.recentListSize).toList(growable: false);
   }
 
   @computed
@@ -169,7 +171,7 @@ abstract class _HomeViewModelBase with Store {
     final idx = tasks.indexWhere((t) => t.id == id);
     if (idx == -1) return;
     tasks[idx] = tasks[idx].copyWith(done: done);
-    final result = await _updateTaskFromIdUseCase(id, TaskModel.fromEntity(tasks[idx]));
+    final result = await _updateTaskFromIdUseCase(id, tasks[idx]);
 
     updateTaskState = result.fold((l) => ErrorState(l), (r) => SuccessState(null));
   }
@@ -249,4 +251,10 @@ abstract class _HomeViewModelBase with Store {
 
     doneResult.fold((l) => doneTasksState = ErrorState(l), (r) => doneTasksState = SuccessState(r));
   }
+
+  // ----------------------------
+  // Getters And Setters
+  // ----------------------------
+
+  int get recentListSize => lastTasks.length;
 }

@@ -18,7 +18,7 @@ class DeleteButton extends StatelessWidget {
           padding: const EdgeInsets.only(right: 16.0),
           child: IconButton(
             tooltip: 'Excluir selecionadas',
-            icon: Icon(Icons.delete, color: AppTheme.colors.red),
+            icon: Icon(Icons.delete, color: AppTheme.of(context).colors.red),
             onPressed: onDelete,
           ),
         ),

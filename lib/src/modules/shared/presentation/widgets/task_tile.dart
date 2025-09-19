@@ -33,29 +33,27 @@ class TaskTile extends StatelessWidget {
     this.onTap,
   });
 
-  Color _dateColor() {
-    if (isCompleted) return AppTheme.colors.green;
-    if (date == null) return AppTheme.colors.darkGrey;
-    if (date!.isOlderThanNow) return AppTheme.colors.red;
-    if (date!.isToday) return AppTheme.colors.orange;
-    if (date!.isTomorrow) return AppTheme.colors.blue;
-    return AppTheme.colors.darkGrey;
+  Color _dateColor(BuildContext context) {
+    if (isCompleted) return AppTheme.of(context).colors.green;
+    if (date == null) return AppTheme.of(context).colors.darkGrey;
+    if (date!.isOlderThanNow) return AppTheme.of(context).colors.red;
+    if (date!.isToday) return AppTheme.of(context).colors.orange;
+    if (date!.isTomorrow) return AppTheme.of(context).colors.blue;
+    return AppTheme.of(context).colors.darkGrey;
   }
 
   @override
   Widget build(BuildContext context) {
-    final dateColor = _dateColor();
+    final dateColor = _dateColor(context);
 
     return ListTile(
       selected: selected,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      selectedTileColor: AppTheme.colors.lightBlue,
-      tileColor: Colors.white,
+      selectedTileColor: AppTheme.of(context).colors.lightBlue,
       contentPadding: EdgeInsets.zero,
       horizontalTitleGap: 0,
-      onTap: isSelectionEnabled ? onTap : null,
+      onTap: isSelectionEnabled ? onTap : () => onChanged?.call(!isCompleted),
       onLongPress: onLongPress,
-
       leading: Container(
         padding: const EdgeInsets.only(left: 8.0),
         width: 40,
@@ -65,13 +63,17 @@ class TaskTile extends StatelessWidget {
           child: Checkbox(
             value: isCompleted,
             shape: const CircleBorder(),
-            activeColor: AppTheme.colors.green,
+            activeColor: AppTheme.of(context).colors.green,
             onChanged: (v) => onChanged?.call(v ?? false),
           ),
         ),
       ),
 
-      title: Text(title, style: AppTheme.textStyles.body2Regular, overflow: TextOverflow.clip),
+      title: Text(
+        title,
+        style: AppTheme.of(context).textStyles.body2Regular,
+        overflow: TextOverflow.clip,
+      ),
 
       subtitle: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -83,18 +85,18 @@ class TaskTile extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 date != null ? date!.formatRelative() : 'Nenhuma data definida',
-                style: AppTheme.textStyles.caption.copyWith(color: dateColor),
+                style: AppTheme.of(context).textStyles.caption.copyWith(color: dateColor),
               ),
             ],
           ),
           RichText(
             text: TextSpan(
-              style: AppTheme.textStyles.caption,
+              style: AppTheme.of(context).textStyles.caption,
               children: [
                 TextSpan(text: category),
                 WidgetSpan(
                   alignment: PlaceholderAlignment.middle,
-                  child: Text(' #', style: AppTheme.textStyles.body2Bold),
+                  child: Text(' #', style: AppTheme.of(context).textStyles.body2Bold),
                 ),
               ],
             ),
@@ -119,11 +121,13 @@ class TaskTile extends StatelessWidget {
             value: 'delete',
             child: Row(
               children: [
-                Icon(Icons.delete, size: 18, color: AppTheme.colors.red),
+                Icon(Icons.delete, size: 18, color: AppTheme.of(context).colors.red),
                 SizedBox(width: 8),
                 Text(
                   'Deletar',
-                  style: AppTheme.textStyles.body2Regular.copyWith(color: AppTheme.colors.red),
+                  style: AppTheme.of(
+                    context,
+                  ).textStyles.body2Regular.copyWith(color: AppTheme.of(context).colors.red),
                 ),
               ],
             ),

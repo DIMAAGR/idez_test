@@ -18,6 +18,10 @@ dependencies:
   flutter_mobx: ^2.3.0
   dartz: ^0.10.1
   mask_text_input_formatter: ^2.9.0
+  flutter_local_notifications: ^19.4.2
+  timezone: ^0.10.1
+  uuid: ^4.5.1
+  flutter_timezone: ^4.1.1
 
 dev_dependencies:
   mobx_codegen: ^2.4.9

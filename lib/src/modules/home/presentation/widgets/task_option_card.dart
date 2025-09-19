@@ -26,7 +26,7 @@ class TaskOptionCard extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.all(16.0),
         backgroundColor: backgroundColor,
-        overlayColor: AppTheme.colors.darkGrey,
+        overlayColor: AppTheme.of(context).colors.darkGrey,
         alignment: Alignment.topLeft,
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -53,11 +53,15 @@ class TaskOptionCard extends StatelessWidget {
                     )
                   : Text(
                       '$count ',
-                      style: AppTheme.textStyles.body2Bold.copyWith(color: AppTheme.colors.black),
+                      style: AppTheme.of(
+                        context,
+                      ).textStyles.body2Bold.copyWith(color: AppTheme.of(context).colors.black),
                     ),
               Text(
                 title,
-                style: AppTheme.textStyles.body2Regular.copyWith(color: AppTheme.colors.darkGrey),
+                style: AppTheme.of(
+                  context,
+                ).textStyles.body2Regular.copyWith(color: AppTheme.of(context).colors.darkGrey),
               ),
             ],
           ),

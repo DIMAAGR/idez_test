@@ -55,7 +55,7 @@ class _TaskTextFormFieldState extends State<TaskTextFormField> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
 
     return FormField<String>(
       validator: widget.validator,
@@ -73,7 +73,7 @@ class _TaskTextFormFieldState extends State<TaskTextFormField> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if ((widget.titleText ?? '').isNotEmpty)
-              Text(widget.titleText!, style: AppTheme.textStyles.button),
+              Text(widget.titleText!, style: AppTheme.of(context).textStyles.button),
             if ((widget.titleText ?? '').isNotEmpty) const SizedBox(height: 4),
 
             Focus(
@@ -87,7 +87,7 @@ class _TaskTextFormFieldState extends State<TaskTextFormField> {
                   widget.onFieldSubmitted?.call(v);
                   state.validate();
                 },
-                style: AppTheme.textStyles.button,
+                style: AppTheme.of(context).textStyles.button,
                 decoration: InputDecoration(
                   hintText: widget.hintText,
                   isDense: true,
@@ -122,7 +122,7 @@ class _TaskTextFormFieldState extends State<TaskTextFormField> {
               const SizedBox(height: 4),
               Text(
                 state.errorText!,
-                style: AppTheme.textStyles.caption.copyWith(color: colors.red),
+                style: AppTheme.of(context).textStyles.caption.copyWith(color: colors.red),
                 textAlign: TextAlign.start,
               ),
             ],

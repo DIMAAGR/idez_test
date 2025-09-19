@@ -27,7 +27,7 @@ class _TaskViewState extends State<TaskView> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
 
-  late final ReactionDisposer _disposer;
+  late final ReactionDisposer _taskDisposer;
 
   @override
   void initState() {
@@ -55,16 +55,16 @@ class _TaskViewState extends State<TaskView> {
 
     widget.viewModel.loadCategories();
 
-    _disposer = reaction<ViewModelState>((_) => widget.viewModel.state, (state) {
+    _taskDisposer = reaction<ViewModelState>((_) => widget.viewModel.state, (state) {
       if (state is ErrorState) {
         final failure = (state).error;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               failure.message ?? 'Erro inesperado',
-              style: AppTheme.textStyles.body2Regular.copyWith(color: Colors.white),
+              style: AppTheme.of(context).textStyles.body2Regular.copyWith(color: Colors.white),
             ),
-            backgroundColor: AppTheme.colors.red,
+            backgroundColor: AppTheme.of(context).colors.red,
           ),
         );
       } else if (state is SuccessState) {
@@ -72,9 +72,9 @@ class _TaskViewState extends State<TaskView> {
           SnackBar(
             content: Text(
               'Tarefa salva com sucesso!',
-              style: AppTheme.textStyles.body2Regular.copyWith(color: Colors.white),
+              style: AppTheme.of(context).textStyles.body2Regular.copyWith(color: Colors.white),
             ),
-            backgroundColor: AppTheme.colors.green,
+            backgroundColor: AppTheme.of(context).colors.green,
           ),
         );
         Navigator.of(context).pop(true);
@@ -84,7 +84,7 @@ class _TaskViewState extends State<TaskView> {
 
   @override
   void dispose() {
-    _disposer();
+    _taskDisposer();
     _titleController.dispose();
     _dateController.dispose();
     _timeController.dispose();
@@ -99,22 +99,28 @@ class _TaskViewState extends State<TaskView> {
       appBar: AppBar(
         title: Text(
           widget.isCreate ? 'Nova Tarefa' : 'Editar Tarefa',
-          style: AppTheme.textStyles.body1Regular,
+          style: AppTheme.of(context).textStyles.body1Regular,
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: AppTheme.colors.blue,
+                foregroundColor: AppTheme.of(context).colors.blue,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
+
               onPressed: () {
                 if (_formKey.currentState?.validate() ?? false) {
                   if (widget.isCreate) {
                     widget.viewModel.createTask();
                   } else {
-                    widget.viewModel.editTask(widget.task!.id);
+                    widget.viewModel.editTask(
+                      id: widget.task!.id,
+                      originalCreatedAt: widget.task!.createdAt,
+                      preserveDone: true,
+                      originalDoneValue: widget.task!.done,
+                    );
                   }
                 }
               },
@@ -130,7 +136,7 @@ class _TaskViewState extends State<TaskView> {
         children: [
           Text(
             widget.isCreate ? 'Criar uma nova tarefa' : 'Editar tarefa',
-            style: AppTheme.textStyles.h5,
+            style: AppTheme.of(context).textStyles.h5,
           ),
           SizedBox(height: 16),
           Form(
@@ -165,7 +171,7 @@ class _TaskViewState extends State<TaskView> {
           const SizedBox(height: 24),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text('Categoria (Opcional)', style: AppTheme.textStyles.button),
+            child: Text('Categoria (Opcional)', style: AppTheme.of(context).textStyles.button),
           ),
           const SizedBox(height: 4),
           Observer(
@@ -191,7 +197,9 @@ class _TaskViewState extends State<TaskView> {
                   children: [
                     Text(
                       'Falha ao carregar categorias',
-                      style: AppTheme.textStyles.caption.copyWith(color: AppTheme.colors.red),
+                      style: AppTheme.of(
+                        context,
+                      ).textStyles.caption.copyWith(color: AppTheme.of(context).colors.red),
                     ),
                     const SizedBox(width: 8),
                     TextButton(
@@ -204,32 +212,38 @@ class _TaskViewState extends State<TaskView> {
 
               final items = widget.viewModel.categories;
 
-              return DropdownButtonFormField<String?>(
-                isExpanded: true,
-                value: widget.viewModel.selectedCategoryId,
-                dropdownColor: Colors.white,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppTheme.colors.grey, width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppTheme.colors.blue, width: 2),
+              final loading = catState is LoadingState;
+              return AbsorbPointer(
+                absorbing: loading,
+                child: Opacity(
+                  opacity: loading ? 0.6 : 1,
+                  child: DropdownButtonFormField<String?>(
+                    isExpanded: true,
+                    value: widget.viewModel.selectedCategoryId,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppTheme.of(context).colors.grey, width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppTheme.of(context).colors.blue, width: 2),
+                      ),
+                    ),
+                    hint: const Text('Selecionar categoria'),
+                    items: [
+                      const DropdownMenuItem<String?>(value: null, child: Text('Sem categoria')),
+                      ...items.map(
+                        (c) => DropdownMenuItem<String?>(
+                          value: c.id,
+                          child: Text(c.name.isNotEmpty ? c.name : c.id),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) => widget.viewModel.setCategory(val),
                   ),
                 ),
-                hint: const Text('Selecionar categoria'),
-                items: [
-                  const DropdownMenuItem<String?>(value: null, child: Text('Sem categoria')),
-                  ...items.map(
-                    (c) => DropdownMenuItem<String?>(
-                      value: c.id,
-                      child: Text(c.name.isNotEmpty == true ? c.name : c.id),
-                    ),
-                  ),
-                ],
-                onChanged: (val) => widget.viewModel.setCategory(val),
               );
             },
           ),

@@ -13,7 +13,16 @@ class BottomPillNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(color: Colors.white),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((255 * .08).round()),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
       child: _PillTrack(current: current, onChanged: onChanged),
     );
   }
@@ -50,7 +59,7 @@ class _PillTrack extends StatelessWidget {
                   curve: Curves.easeOutCubic,
                   margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: (AppTheme.colors.blue).withAlpha((255 * .12).round()),
+                    color: (AppTheme.of(context).colors.blue).withAlpha((255 * .12).round()),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -94,8 +103,8 @@ class _PillItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = AppTheme.colors.darkGrey;
-    final accent = AppTheme.colors.blue;
+    final baseColor = AppTheme.of(context).colors.darkGrey;
+    final accent = AppTheme.of(context).colors.blue;
 
     return SizedBox(
       width: width,

@@ -1,14 +1,13 @@
 import 'package:dartz/dartz.dart';
-import 'package:idez_test/src/modules/shared/domain/usecases/get_all_categories_use_case.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../../../core/state/view_model_state.dart';
-import '../../../shared/data/models/task_model.dart';
 import '../../../shared/domain/entities/category_entity.dart';
 import '../../../shared/domain/entities/task_entity.dart';
 import '../../../shared/domain/usecases/delete_from_id_range_use_case.dart';
 import '../../../shared/domain/usecases/delete_from_id_use_case.dart';
+import '../../../shared/domain/usecases/get_all_categories_use_case.dart';
 import '../../../shared/domain/usecases/get_all_tasks_use_case.dart';
 import '../../../shared/domain/usecases/update_task_from_id_use_case.dart';
 import '../../domain/enums/board_type_enum.dart';
@@ -190,7 +189,7 @@ abstract class _BoardViewModel with Store {
     final idx = tasks.indexWhere((t) => t.id == id);
     if (idx == -1) return;
     tasks[idx] = tasks[idx].copyWith(done: done);
-    final result = await _updateTaskFromIdUseCase(id, TaskModel.fromEntity(tasks[idx]));
+    final result = await _updateTaskFromIdUseCase(id, tasks[idx]);
 
     updateTaskState = result.fold((l) => ErrorState(l), (r) => SuccessState(null));
   }

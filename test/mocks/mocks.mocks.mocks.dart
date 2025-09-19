@@ -3,23 +3,38 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i8;
 
 import 'package:dartz/dartz.dart' as _i2;
-import 'package:idez_test/src/core/errors/failure.dart' as _i5;
+import 'package:idez_test/src/core/errors/failure.dart' as _i9;
 import 'package:idez_test/src/modules/categories/data/models/category_model.dart'
-    as _i10;
+    as _i15;
 import 'package:idez_test/src/modules/shared/data/data_source/task_local_data_source.dart'
-    as _i9;
-import 'package:idez_test/src/modules/shared/data/models/task_model.dart'
-    as _i8;
-import 'package:idez_test/src/modules/shared/domain/entities/category_entity.dart'
-    as _i7;
-import 'package:idez_test/src/modules/shared/domain/entities/task_entity.dart'
-    as _i6;
-import 'package:idez_test/src/modules/shared/domain/repository/shared_repository.dart'
+    as _i13;
+import 'package:idez_test/src/modules/shared/data/models/settings_model.dart'
     as _i3;
+import 'package:idez_test/src/modules/shared/data/models/task_model.dart'
+    as _i14;
+import 'package:idez_test/src/modules/shared/domain/entities/category_entity.dart'
+    as _i11;
+import 'package:idez_test/src/modules/shared/domain/entities/settings_entity.dart'
+    as _i12;
+import 'package:idez_test/src/modules/shared/domain/entities/task_entity.dart'
+    as _i10;
+import 'package:idez_test/src/modules/shared/domain/gateways/notification_gateway.dart'
+    as _i16;
+import 'package:idez_test/src/modules/shared/domain/repository/shared_repository.dart'
+    as _i7;
+import 'package:idez_test/src/modules/shared/domain/services/reminder_policy.dart'
+    as _i18;
+import 'package:idez_test/src/modules/shared/domain/usecases/cancel_task_reminders_use_case.dart'
+    as _i4;
+import 'package:idez_test/src/modules/shared/domain/usecases/get_notification_enabled_use_case.dart'
+    as _i6;
+import 'package:idez_test/src/modules/shared/domain/usecases/schedule_task_reminders_use_case.dart'
+    as _i5;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:timezone/timezone.dart' as _i17;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -40,148 +55,370 @@ class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
     : super(parent, parentInvocation);
 }
 
+class _FakeSettingsModel_1 extends _i1.SmartFake implements _i3.SettingsModel {
+  _FakeSettingsModel_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeCancelTaskRemindersUseCase_2 extends _i1.SmartFake
+    implements _i4.CancelTaskRemindersUseCase {
+  _FakeCancelTaskRemindersUseCase_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeScheduleTaskRemindersUseCase_3 extends _i1.SmartFake
+    implements _i5.ScheduleTaskRemindersUseCase {
+  _FakeScheduleTaskRemindersUseCase_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(parent, parentInvocation);
+}
+
+class _FakeGetNotificationEnabledUseCase_4 extends _i1.SmartFake
+    implements _i6.GetNotificationEnabledUseCase {
+  _FakeGetNotificationEnabledUseCase_4(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(parent, parentInvocation);
+}
+
 /// A class which mocks [SharedRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSharedRepository extends _i1.Mock implements _i3.SharedRepository {
+class MockSharedRepository extends _i1.Mock implements _i7.SharedRepository {
   MockSharedRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, List<_i6.TaskEntity>>> getAllTasks() =>
+  _i8.Future<_i2.Either<_i9.Failure, List<_i10.TaskEntity>>> getAllTasks() =>
       (super.noSuchMethod(
             Invocation.method(#getAllTasks, []),
             returnValue:
-                _i4.Future<_i2.Either<_i5.Failure, List<_i6.TaskEntity>>>.value(
-                  _FakeEither_0<_i5.Failure, List<_i6.TaskEntity>>(
+                _i8.Future<
+                  _i2.Either<_i9.Failure, List<_i10.TaskEntity>>
+                >.value(
+                  _FakeEither_0<_i9.Failure, List<_i10.TaskEntity>>(
                     this,
                     Invocation.method(#getAllTasks, []),
                   ),
                 ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, List<_i6.TaskEntity>>>);
+          as _i8.Future<_i2.Either<_i9.Failure, List<_i10.TaskEntity>>>);
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, List<_i6.TaskEntity>>> getAllDoneTasks() =>
+  _i8.Future<_i2.Either<_i9.Failure, List<_i10.TaskEntity>>>
+  getAllDoneTasks() =>
       (super.noSuchMethod(
             Invocation.method(#getAllDoneTasks, []),
             returnValue:
-                _i4.Future<_i2.Either<_i5.Failure, List<_i6.TaskEntity>>>.value(
-                  _FakeEither_0<_i5.Failure, List<_i6.TaskEntity>>(
+                _i8.Future<
+                  _i2.Either<_i9.Failure, List<_i10.TaskEntity>>
+                >.value(
+                  _FakeEither_0<_i9.Failure, List<_i10.TaskEntity>>(
                     this,
                     Invocation.method(#getAllDoneTasks, []),
                   ),
                 ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, List<_i6.TaskEntity>>>);
+          as _i8.Future<_i2.Either<_i9.Failure, List<_i10.TaskEntity>>>);
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, List<_i7.CategoryEntity>>>
+  _i8.Future<_i2.Either<_i9.Failure, List<_i11.CategoryEntity>>>
   getAllCategories() =>
       (super.noSuchMethod(
             Invocation.method(#getAllCategories, []),
             returnValue:
-                _i4.Future<
-                  _i2.Either<_i5.Failure, List<_i7.CategoryEntity>>
+                _i8.Future<
+                  _i2.Either<_i9.Failure, List<_i11.CategoryEntity>>
                 >.value(
-                  _FakeEither_0<_i5.Failure, List<_i7.CategoryEntity>>(
+                  _FakeEither_0<_i9.Failure, List<_i11.CategoryEntity>>(
                     this,
                     Invocation.method(#getAllCategories, []),
                   ),
                 ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, List<_i7.CategoryEntity>>>);
+          as _i8.Future<_i2.Either<_i9.Failure, List<_i11.CategoryEntity>>>);
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, void>> deleteFromId(String? id) =>
+  _i8.Future<_i2.Either<_i9.Failure, _i12.SettingsEntity>> getSettingsData() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSettingsData, []),
+            returnValue:
+                _i8.Future<_i2.Either<_i9.Failure, _i12.SettingsEntity>>.value(
+                  _FakeEither_0<_i9.Failure, _i12.SettingsEntity>(
+                    this,
+                    Invocation.method(#getSettingsData, []),
+                  ),
+                ),
+          )
+          as _i8.Future<_i2.Either<_i9.Failure, _i12.SettingsEntity>>);
+
+  @override
+  _i8.Future<_i2.Either<_i9.Failure, void>> deleteFromId(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#deleteFromId, [id]),
-            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
-              _FakeEither_0<_i5.Failure, void>(
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, void>>.value(
+              _FakeEither_0<_i9.Failure, void>(
                 this,
                 Invocation.method(#deleteFromId, [id]),
               ),
             ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, void>>);
+          as _i8.Future<_i2.Either<_i9.Failure, void>>);
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, void>> deleteFromIdRange(
+  _i8.Future<_i2.Either<_i9.Failure, void>> deleteFromIdRange(
     Iterable<String>? ids,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#deleteFromIdRange, [ids]),
-            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
-              _FakeEither_0<_i5.Failure, void>(
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, void>>.value(
+              _FakeEither_0<_i9.Failure, void>(
                 this,
                 Invocation.method(#deleteFromIdRange, [ids]),
               ),
             ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, void>>);
+          as _i8.Future<_i2.Either<_i9.Failure, void>>);
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, void>> updateFromId(
+  _i8.Future<_i2.Either<_i9.Failure, void>> updateFromId(
     String? id,
-    _i8.TaskModel? task,
+    _i10.TaskEntity? task,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#updateFromId, [id, task]),
-            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
-              _FakeEither_0<_i5.Failure, void>(
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, void>>.value(
+              _FakeEither_0<_i9.Failure, void>(
                 this,
                 Invocation.method(#updateFromId, [id, task]),
               ),
             ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, void>>);
+          as _i8.Future<_i2.Either<_i9.Failure, void>>);
+
+  @override
+  _i8.Future<_i2.Either<_i9.Failure, bool>> getNotificationEnabled() =>
+      (super.noSuchMethod(
+            Invocation.method(#getNotificationEnabled, []),
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, bool>>.value(
+              _FakeEither_0<_i9.Failure, bool>(
+                this,
+                Invocation.method(#getNotificationEnabled, []),
+              ),
+            ),
+          )
+          as _i8.Future<_i2.Either<_i9.Failure, bool>>);
 }
 
 /// A class which mocks [TasksLocalDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockTasksLocalDataSource extends _i1.Mock
-    implements _i9.TasksLocalDataSource {
+    implements _i13.TasksLocalDataSource {
   MockTasksLocalDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<List<_i8.TaskModel>> getAllTasks() =>
+  _i8.Future<List<_i14.TaskModel>> getAllTasks() =>
       (super.noSuchMethod(
             Invocation.method(#getAllTasks, []),
-            returnValue: _i4.Future<List<_i8.TaskModel>>.value(
-              <_i8.TaskModel>[],
+            returnValue: _i8.Future<List<_i14.TaskModel>>.value(
+              <_i14.TaskModel>[],
             ),
           )
-          as _i4.Future<List<_i8.TaskModel>>);
+          as _i8.Future<List<_i14.TaskModel>>);
 
   @override
-  _i4.Future<List<_i10.CategoryModel>> getAllCategories() =>
+  _i8.Future<List<_i15.CategoryModel>> getAllCategories() =>
       (super.noSuchMethod(
             Invocation.method(#getAllCategories, []),
-            returnValue: _i4.Future<List<_i10.CategoryModel>>.value(
-              <_i10.CategoryModel>[],
+            returnValue: _i8.Future<List<_i15.CategoryModel>>.value(
+              <_i15.CategoryModel>[],
             ),
           )
-          as _i4.Future<List<_i10.CategoryModel>>);
+          as _i8.Future<List<_i15.CategoryModel>>);
 
   @override
-  _i4.Future<void> saveAllTasks(List<_i8.TaskModel>? tasks) =>
+  _i8.Future<_i3.SettingsModel> getSettingsData() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSettingsData, []),
+            returnValue: _i8.Future<_i3.SettingsModel>.value(
+              _FakeSettingsModel_1(
+                this,
+                Invocation.method(#getSettingsData, []),
+              ),
+            ),
+          )
+          as _i8.Future<_i3.SettingsModel>);
+
+  @override
+  _i8.Future<void> saveAllTasks(List<_i14.TaskModel>? tasks) =>
       (super.noSuchMethod(
             Invocation.method(#saveAllTasks, [tasks]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i4.Future<void> saveAllCategories(List<_i10.CategoryModel>? cats) =>
+  _i8.Future<void> saveAllCategories(List<_i15.CategoryModel>? cats) =>
       (super.noSuchMethod(
             Invocation.method(#saveAllCategories, [cats]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i8.Future<void>);
+}
+
+/// A class which mocks [NotificationGateway].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockNotificationGateway extends _i1.Mock
+    implements _i16.NotificationGateway {
+  MockNotificationGateway() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i8.Future<void> schedule({
+    required int? id,
+    required String? title,
+    required String? body,
+    required _i17.TZDateTime? when,
+    Map<String, String>? payload,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#schedule, [], {
+              #id: id,
+              #title: title,
+              #body: body,
+              #when: when,
+              #payload: payload,
+            }),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
+
+  @override
+  _i8.Future<void> cancel(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancel, [id]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
+
+  @override
+  _i8.Future<void> cancelAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelAll, []),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
+}
+
+/// A class which mocks [ReminderPolicy].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockReminderPolicy extends _i1.Mock implements _i18.ReminderPolicy {
+  MockReminderPolicy() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.CancelTaskRemindersUseCase get cancel =>
+      (super.noSuchMethod(
+            Invocation.getter(#cancel),
+            returnValue: _FakeCancelTaskRemindersUseCase_2(
+              this,
+              Invocation.getter(#cancel),
+            ),
+          )
+          as _i4.CancelTaskRemindersUseCase);
+
+  @override
+  _i5.ScheduleTaskRemindersUseCase get schedule =>
+      (super.noSuchMethod(
+            Invocation.getter(#schedule),
+            returnValue: _FakeScheduleTaskRemindersUseCase_3(
+              this,
+              Invocation.getter(#schedule),
+            ),
+          )
+          as _i5.ScheduleTaskRemindersUseCase);
+
+  @override
+  _i6.GetNotificationEnabledUseCase get isEnabled =>
+      (super.noSuchMethod(
+            Invocation.getter(#isEnabled),
+            returnValue: _FakeGetNotificationEnabledUseCase_4(
+              this,
+              Invocation.getter(#isEnabled),
+            ),
+          )
+          as _i6.GetNotificationEnabledUseCase);
+
+  @override
+  _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>> afterCreate(
+    _i10.TaskEntity? t,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#afterCreate, [t]),
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>.value(
+              _FakeEither_0<_i9.Failure, _i2.Unit>(
+                this,
+                Invocation.method(#afterCreate, [t]),
+              ),
+            ),
+          )
+          as _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>);
+
+  @override
+  _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>> afterUpdate(
+    String? id,
+    _i10.TaskEntity? t,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#afterUpdate, [id, t]),
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>.value(
+              _FakeEither_0<_i9.Failure, _i2.Unit>(
+                this,
+                Invocation.method(#afterUpdate, [id, t]),
+              ),
+            ),
+          )
+          as _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>);
+
+  @override
+  _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>> afterDelete(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#afterDelete, [id]),
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>.value(
+              _FakeEither_0<_i9.Failure, _i2.Unit>(
+                this,
+                Invocation.method(#afterDelete, [id]),
+              ),
+            ),
+          )
+          as _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>);
+
+  @override
+  _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>> afterDeleteMany(
+    Iterable<String>? ids,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#afterDeleteMany, [ids]),
+            returnValue: _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>.value(
+              _FakeEither_0<_i9.Failure, _i2.Unit>(
+                this,
+                Invocation.method(#afterDeleteMany, [ids]),
+              ),
+            ),
+          )
+          as _i8.Future<_i2.Either<_i9.Failure, _i2.Unit>>);
 }

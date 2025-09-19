@@ -9,31 +9,55 @@ import '../../../../mocks/mocks.mocks.mocks.dart';
 
 void main() {
   late MockSharedRepository repo;
+  late MockReminderPolicy policy;
   late DeleteFromIdRangeUseCase usecase;
 
   setUp(() {
     repo = MockSharedRepository();
-    usecase = DeleteFromIdRangeUseCaseImpl(repo);
+    policy = MockReminderPolicy();
+    usecase = DeleteFromIdRangeUseCaseImpl(repo, policy);
   });
 
-  test('deve delegar para o repository e retornar Right(null) no sucesso', () async {
+  test('sucesso: delega ao repo e chama policy.afterDeleteMany', () async {
     when(repo.deleteFromIdRange(any)).thenAnswer((_) async => const Right(null));
+    when(policy.afterDeleteMany(any)).thenAnswer((_) async => const Right(unit));
 
-    final ids = ['1', '2', '3'];
-    final result = await usecase(ids);
+    final result = await usecase(['1', '2']);
 
     expect(result.isRight(), true);
-    verify(repo.deleteFromIdRange(ids)).called(1);
+    verify(repo.deleteFromIdRange(any)).called(1);
+    verify(policy.afterDeleteMany(any)).called(1);
     verifyNoMoreInteractions(repo);
+    verifyNoMoreInteractions(policy);
   });
 
-  test('deve retornar Left(StorageFailure) no erro', () async {
+  test('falha no repo: retorna Left e NÃO chama policy', () async {
     final failure = StorageFailure('boom');
+
     when(repo.deleteFromIdRange(any)).thenAnswer((_) async => Left(failure));
 
     final result = await usecase(['x']);
 
     expect(result.isLeft(), true);
-    result.fold((l) => expect(l, failure), (_) => fail('não deveria ter sucesso'));
+    result.fold((l) => expect(l, failure), (_) => fail('não deveria'));
+    verify(repo.deleteFromIdRange(any)).called(1);
+    verifyZeroInteractions(policy);
+  });
+
+  test('falha na policy: retorna Left da policy', () async {
+    final failure = NotificationFailure('policy fail');
+
+    when(repo.deleteFromIdRange(any)).thenAnswer((_) async => const Right(null));
+    when(policy.afterDeleteMany(any)).thenAnswer((_) async => Left(failure));
+
+    final result = await usecase(['z']);
+
+    expect(result.isLeft(), true);
+    result.fold((l) => expect(l, failure), (_) => fail('não deveria'));
+
+    verify(repo.deleteFromIdRange(any)).called(1);
+    verify(policy.afterDeleteMany(any)).called(1);
+    verifyNoMoreInteractions(repo);
+    verifyNoMoreInteractions(policy);
   });
 }

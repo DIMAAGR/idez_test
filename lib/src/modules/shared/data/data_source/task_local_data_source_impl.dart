@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:idez_test/src/core/schema/storage_schema.dart';
+import 'package:idez_test/src/modules/shared/data/models/settings_model.dart';
 
 import '../../../../core/storage/wrapper.dart';
 import '../models/task_model.dart';
@@ -37,5 +38,15 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
   Future<void> saveAllCategories(List<CategoryModel> cats) async {
     final encoded = jsonEncode(cats.map((e) => e.toJson()).toList());
     await store.setString(StorageSchema.categoriesKey, encoded);
+  }
+
+  @override
+  Future<SettingsModel> getSettingsData() async {
+    final raw = store.getString(StorageSchema.settingsKey);
+    if (raw == null) {
+      return SettingsModel.defaultSettings();
+    }
+    final map = jsonDecode(raw) as Map<String, dynamic>;
+    return SettingsModel.fromJson(map);
   }
 }

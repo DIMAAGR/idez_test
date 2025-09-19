@@ -69,7 +69,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
   }
 
   void _showError(Object error) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
     final msg = error.toString();
     ScaffoldMessenger.of(
       context,
@@ -77,7 +77,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
   }
 
   void _showInfo(String msg) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: colors.darkGrey));
@@ -128,7 +128,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colors;
+    final colors = AppTheme.of(context).colors;
 
     return PopScope(
       onPopInvokedWithResult: (result, _) async {
@@ -141,7 +141,6 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
             builder: (_) {
               final sel = widget.viewModel.isSelectionMode;
               return AppBar(
-                backgroundColor: Colors.white,
                 elevation: 0,
                 leading: SizedBox(
                   width: kToolbarHeight,
@@ -238,7 +237,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
                   widget.viewModel.hasActiveFilters
                       ? 'Tarefas Filtradas'
                       : _titleForBoard(widget.viewModel.boardType),
-                  style: AppTheme.textStyles.h5,
+                  style: AppTheme.of(context).textStyles.h5,
                 ),
               ),
             ),
@@ -254,8 +253,8 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
                         child: Text(
                           'Nenhuma tarefa encontrada.\nClique no botão + para adicionar uma nova tarefa.',
                           textAlign: TextAlign.center,
-                          style: AppTheme.textStyles.body1Regular.copyWith(
-                            color: AppTheme.colors.grey,
+                          style: AppTheme.of(context).textStyles.body1Regular.copyWith(
+                            color: AppTheme.of(context).colors.grey,
                           ),
                         ),
                       ),
@@ -275,7 +274,7 @@ class _BoardViewState extends State<BoardView> with PendingDeletionMixin {
                       separatorBuilder: (_, i) => FadeIn(
                         delay: _staggerFor(i) ~/ 2,
                         duration: const Duration(milliseconds: 180),
-                        child: Divider(color: AppTheme.colors.grey.withAlpha(70)),
+                        child: Divider(color: AppTheme.of(context).colors.grey.withAlpha(70)),
                       ),
                       itemBuilder: (_, i) {
                         final t = widget.viewModel.visibleTasks[i];

@@ -1,59 +1,56 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:idez_test/src/modules/shared/domain/enums/selected_theme_enum.dart';
 import 'package:mockito/mockito.dart';
 import 'package:dartz/dartz.dart';
 
 import 'package:idez_test/src/core/errors/failure.dart';
-import 'package:idez_test/src/modules/shared/domain/usecases/get_notification_enabled_use_case.dart';
+import 'package:idez_test/src/modules/shared/domain/entities/settings_entity.dart';
+import 'package:idez_test/src/modules/shared/domain/usecases/get_settings_data_use_case.dart';
 
 import '../../../../mocks/mocks.mocks.mocks.dart';
 
 void main() {
   late MockSharedRepository repo;
-  late GetNotificationEnabledUseCase usecase;
+  late GetSettingsDataUseCase usecase;
 
   setUp(() {
     repo = MockSharedRepository();
-    usecase = GetNotificationEnabledUseCaseImpl(repo);
+    usecase = GetSettingsDataUseCaseImpl(repo);
   });
 
-  test('sucesso: retorna true quando repo habilitado', () async {
-    when(repo.getNotificationEnabled()).thenAnswer((_) async => const Right(true));
+  test('sucesso: retorna SettingsEntity do repo', () async {
+    final expected = SettingsEntity(
+      isNotificationEnabled: true,
+      isPasswordEnabled: false,
+      listSize: 10,
+      selectedTheme: SelectedTheme.system,
+    );
+
+    when(repo.getSettingsData()).thenAnswer((_) async => Right(expected));
 
     final result = await usecase();
 
     expect(result.isRight(), true);
-    result.fold((_) => fail('não deveria falhar'), (enabled) {
-      expect(enabled, true);
+    result.fold((_) => fail('não deveria falhar'), (settings) {
+      expect(settings.isNotificationEnabled, true);
+      expect(settings.selectedTheme, SelectedTheme.system);
     });
 
-    verify(repo.getNotificationEnabled()).called(1);
-    verifyNoMoreInteractions(repo);
-  });
-
-  test('sucesso: retorna false quando repo desabilitado', () async {
-    when(repo.getNotificationEnabled()).thenAnswer((_) async => const Right(false));
-
-    final result = await usecase();
-
-    expect(result.isRight(), true);
-    result.fold((_) => fail('não deveria falhar'), (enabled) {
-      expect(enabled, false);
-    });
-
-    verify(repo.getNotificationEnabled()).called(1);
+    verify(repo.getSettingsData()).called(1);
     verifyNoMoreInteractions(repo);
   });
 
   test('falha: retorna Left(StorageFailure)', () async {
-    final failure = StorageFailure('boom');
-    when(repo.getNotificationEnabled()).thenAnswer((_) async => Left(failure));
+    final failure = StorageFailure('erro ao carregar settings');
+
+    when(repo.getSettingsData()).thenAnswer((_) async => Left(failure));
 
     final result = await usecase();
 
     expect(result.isLeft(), true);
     result.fold((l) => expect(l, failure), (_) => fail('não deveria ter sucesso'));
 
-    verify(repo.getNotificationEnabled()).called(1);
+    verify(repo.getSettingsData()).called(1);
     verifyNoMoreInteractions(repo);
   });
 }

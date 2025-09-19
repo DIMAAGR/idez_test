@@ -19,7 +19,7 @@ void main() {
 
   setUp(() {
     tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('America/Bahia'));
+    tz.setLocalLocation(tz.getLocation('UTC'));
     gateway = MockNotificationGateway();
     usecase = ScheduleTaskRemindersUseCaseImpl(gateway);
   });

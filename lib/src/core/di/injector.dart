@@ -121,7 +121,7 @@ void setupInjector() {
   getIt.registerFactory<CreateTaskUseCase>(() => CreateTaskUseCaseImpl(getIt(), getIt()));
   getIt.registerFactory<CreateCategoryUseCase>(() => CreateCategoryUseCaseImpl(getIt()));
   getIt.registerFactory<GetSettingsDataUseCase>(() => GetSettingsDataUseCaseImpl(getIt()));
-  getIt.registerFactory<PostSaveSettingsUseCse>(() => PostSaveSettingsUseCseImpl(getIt()));
+  getIt.registerFactory<PostSaveSettingsUseCase>(() => PostSaveSettingsUseCaseImpl(getIt()));
   getIt.registerFactory<ClearAllDataUseCase>(() => ClearAllDataUseCaseImpl(getIt()));
   getIt.registerFactory<CancelTaskRemindersUseCase>(() => CancelTaskRemindersUseCaseImpl(getIt()));
 

@@ -16,7 +16,7 @@ class SettingsViewModel = _SettingsViewModelBase with _$SettingsViewModel;
 
 abstract class _SettingsViewModelBase with Store {
   final SettingsService _service;
-  final PostSaveSettingsUseCse _saveSettings;
+  final PostSaveSettingsUseCase _saveSettings;
   final ClearAllDataUseCase _clearAllData;
   final ToggleAllNotificationsUseCase _toggleAllNotifications;
 

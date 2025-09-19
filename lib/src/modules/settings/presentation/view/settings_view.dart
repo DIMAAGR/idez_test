@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:idez_test/src/modules/settings/presentation/widgets/bottom_sheet/recent_list_size_sheet.dart';
 import 'package:idez_test/src/modules/settings/presentation/widgets/bottom_sheet/theme_bottom_sheet.dart';
+import 'package:idez_test/src/modules/settings/presentation/widgets/confirm_clear_all_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../shared/presentation/widgets/fade_in.dart';
 import '../../../shared/presentation/widgets/task_view_body.dart';
@@ -74,26 +76,26 @@ class SettingsView extends StatelessWidget {
               ),
             ),
 
-            FadeIn(
-              delay: const Duration(milliseconds: 400),
-              child: Observer(
-                builder: (_) {
-                  // if (!viewModel.flagPasswordEnabled) return const SizedBox.shrink();
-                  return SettingsTile(
-                    icon: Icons.lock_outline,
-                    title: 'Senha do App',
-                    subtitle: 'Proteja as suas tarefas',
-                    iconColor: colors.red,
-                    trailing: Switch(
-                      value: viewModel.isPasswordEnabled,
-                      onChanged: (_) => viewModel.togglePassword(),
-                    ),
-                    onTap: () => viewModel.togglePassword(),
-                  );
-                },
-              ),
-            ),
-
+            // FadeIn(
+            //   delay: const Duration(milliseconds: 400),
+            //   child: Observer(
+            //     builder: (_) {
+            //       // if (!viewModel.flagPasswordEnabled) return const SizedBox.shrink();
+            //       return SettingsTile(
+            //         icon: Icons.lock_outline,
+            //         title: 'Senha do App',
+            //         subtitle: 'Proteja as suas tarefas',
+            //         iconColor: colors.red,
+            //         trailing: Switch(
+            //           value: viewModel.isPasswordEnabled,
+            //           onChanged: (_) => viewModel.togglePassword(),
+            //         ),
+            //         onTap: () => viewModel.togglePassword(),
+            //       );
+            //     },
+            //   ),
+            // ),
+            //
             FadeIn(
               delay: const Duration(milliseconds: 440),
               child: SettingsTile(
@@ -101,7 +103,9 @@ class SettingsView extends StatelessWidget {
                 title: 'Lista de Recentes',
                 subtitle: 'Altere o tamanho da lista',
                 iconColor: colors.blue,
-                onTap: () {},
+                onTap: () {
+                  showRecentListSizeSheet(context, viewModel);
+                },
               ),
             ),
 
@@ -123,7 +127,9 @@ class SettingsView extends StatelessWidget {
                   size: 16,
                   color: colors.red.withOpacity(0.9),
                 ),
-                onTap: () {},
+                onTap: () {
+                  confirmClearAll(context, viewModel);
+                },
               ),
             ),
 

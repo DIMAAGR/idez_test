@@ -79,7 +79,7 @@ void setupInjector() {
   /// Home View Model
   ///
   getIt.registerLazySingleton<HomeViewModel>(
-    () => HomeViewModel(getIt(), getIt(), getIt(), getIt(), getIt(), getIt()),
+    () => HomeViewModel(getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt()),
   );
 
   ///

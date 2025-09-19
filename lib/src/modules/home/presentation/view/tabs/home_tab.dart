@@ -126,7 +126,7 @@ class _HomeTabState extends State<HomeTab> {
                     shrinkWrap: true,
                     addAutomaticKeepAlives: false,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: viewModel.lastTasks.length,
+                    itemCount: viewModel.recentListSize,
                     separatorBuilder: (context, index) => FadeIn(
                       delay: Duration(milliseconds: 500 + index * 100),
                       child: Divider(color: AppTheme.of(context).colors.grey.withAlpha(70)),

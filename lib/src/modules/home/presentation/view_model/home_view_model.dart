@@ -1,3 +1,4 @@
+import 'package:idez_test/src/core/services/settings/settings_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:dartz/dartz.dart';
 
@@ -27,6 +28,7 @@ abstract class _HomeViewModelBase with Store {
   final DeleteFromIdUseCase _deleteFromIdUseCase;
   final DeleteFromIdRangeUseCase _deleteFromIdRangeUseCase;
   final UpdateTaskFromIdUseCase _updateTaskFromIdUseCase;
+  final SettingsService _settingsService;
 
   _HomeViewModelBase(
     this._allCategoriesUseCase,
@@ -35,6 +37,7 @@ abstract class _HomeViewModelBase with Store {
     this._deleteFromIdUseCase,
     this._deleteFromIdRangeUseCase,
     this._updateTaskFromIdUseCase,
+    this._settingsService,
   );
 
   // ----------------------------
@@ -72,7 +75,7 @@ abstract class _HomeViewModelBase with Store {
   @computed
   List<TaskEntity> get lastTasks {
     final sorted = [...tasks]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return sorted.take(10).toList(growable: false);
+    return sorted.take(_settingsService.recentListSize).toList(growable: false);
   }
 
   @computed
@@ -248,4 +251,10 @@ abstract class _HomeViewModelBase with Store {
 
     doneResult.fold((l) => doneTasksState = ErrorState(l), (r) => doneTasksState = SuccessState(r));
   }
+
+  // ----------------------------
+  // Getters And Setters
+  // ----------------------------
+
+  int get recentListSize => lastTasks.length;
 }
